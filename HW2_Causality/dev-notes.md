@@ -35,25 +35,27 @@ ChatGPT:
 - **Redundant / overlapping**:`adiposity, obesity`
 
 Robin's girlfriend (vet):
-- Multifactorial that have influence
-- Genes: If in family, then correlation in descendance high
-  - Probably how you abbauen cholesterole and fat -> Haengt vom Stoffwechsel ab -> Wie gut die abgebaut werden oder ob die irgendwo haengen bleiben
-- Herzkranzgefaesse: Wie aufgebaut? Wie elastisch? Wie glatt innere Wand (endothel)
-- Meistens eine Form von Herzinfarkt (Endgefaesse verstopfen)
-  - Kein starres Rohr: Elastizitaet wichtig und auch wie rau oberflaeche ist -> Bleibt mehr haengen -> verstopft schneller
-- Konsum (von klein an) / Detritus:
-  - Fetthaltige Lebensmittel -> Da kommste auf Cholesterol
-  - Tabak und Alkohol
-  - Zucker?
-- Systolic blood pressure: Auswurf vom Herzen -> Wsl Einfluss -> Muss durch gesamten grossen Kreislauf -> damit selber versorgen -> Wenn zu schwach, Gefaesse zu eng, dann kann es sich selber nicht gut versorgen.
-- ldl: Ein Tri-Glycerit (Fett). Gibt high and low density. Faktor fuer Abbau auf Produkt. Gibt einen der Boese ist und einer der Gut ist. War LDL oder HDL das problematische? Da waren auch genetische Komponenten dazu.
-- Alter: Gefaesse werden mehr zugeschlammt, Endotel wird sporoeser (rauher, weniger glatt), altes Rohr auch poroeser. Elastizitaet nimmt auch ab. Muskuloes eventuell auch (Zellen werden aelter), aber nicht sicher.
-- Type-A behavior: 
-  - Stress -> Herz schlaegt flach und schnell und versorgt sich selbst nicht so gut -> Weniger durchfluss durh gefaesse, mehr Ablagerungen -> Mehr Risiko. 
-  - Stress -> Cortisol
-  - Stress -> Leute ernaehren sich dann auch nicht mehr so gut, weil sie sich nicht mehr die Zeit nehmen.
-- Obesity: Ueber BMI definiert (?) -> Wie fettleibig man ist -> Mehr Fettgewebe -> Automatisch auf Verteilung -> haengt nah mit Adiposity zusammen
-- Adiposity: Basically the same as obesity.
+
+- Multifactorial factors that have influence  
+- Genes: If in the family, then correlation in descendants is high  
+  - Probably how you break down cholesterol and fat → depends on metabolism → how well they are broken down or whether they get stuck somewhere  
+- Coronary arteries: How are they structured? How elastic? How smooth is the inner wall (endothelium)  
+- Mostly a form of heart attack (end vessels get blocked)  
+  - Not a rigid pipe: elasticity is important and also how rough the surface is → more sticks → clogs faster  
+- Consumption (from an early age) / detritus:  
+  - Fatty foods → that’s how you get to cholesterol  
+  - Tobacco and alcohol  
+  - Sugar?  
+- Systolic blood pressure: Output from the heart → probably has an influence → has to go through the entire large circulation → has to supply itself → if too weak, vessels too narrow, then it cannot supply itself properly  
+- LDL: A triglyceride (fat). There is high and low density. Factor for breakdown into product. There is one that is bad and one that is good. Was LDL or HDL the problematic one? There were also genetic components involved.  
+- Age: Vessels become more clogged, endothelium becomes more porous (rougher, less smooth), old pipe also more porous. Elasticity also decreases. Possibly also muscular (cells get older), but not certain.  
+- Type-A behavior:  
+  - Stress → heart beats shallow and fast and does not supply itself as well → less flow through vessels, more deposits → higher risk  
+  - Stress → cortisol  
+  - Stress → people also don’t eat as well anymore because they don’t take the time  
+- Obesity: Defined via BMI (?) → how obese someone is → more fat tissue → automatically affects distribution → closely related to adiposity  
+- Adiposity: Basically the same as obesity.  
+
 
 # Other notebooks
 
@@ -88,15 +90,6 @@ Robin's girlfriend (vet):
     - Don't control for mediators or colliders
 
 
-# Things to try
-- We can play with expert knowledge:
-- expert_knowledge: pgmpy.estimators.ExpertKnowledge (default: None). Expert knowledge about the causal structure. This can include:
-  - forbidden_edges: Edges that should not be present in the final model
-  - required_edges: Edges that must be present in the final model (can be removed during pruning)
-  - temporal_order: The temporal ordering of variables. Note that explicit orientations
-  specified in the 'orientations' parameter will override this temporal ordering.
-
-
 # Things I've modified
 - I disabled the binning into 4 bins. Binning involves expert knowledge we don't have at that point. Here, it is data driven (oh nice, 4 bins is convenient). Yes, but why the threshold? Doesn't make sense to do right now -> Out.
   - We can do it, but thresholds should make sense!
@@ -108,5 +101,44 @@ Robin's girlfriend (vet):
       - pearsonr: If p-value > significance_level, it assumes that the independence condition satisfied in the data.
 - Included expert knowledge: Made age and genetics upstream because none of the variables can influence them. Downstream I put the disease. I also forbid edges out of the disease, but took it out again, as chd did not occur in the map anymore afterwards. With the hierarchy it works quite fine, though.
 - I got a lot of future warnings. I've updated the code to the newest library version.
+- Obesity and Adiposity are quite similar. I removed obesity.
 
-- I'm having issues with a frozenset error. It occurs once you enable the expert knowledge. But expert knowledge is quite powerful. I left it in a state where it works. I've also tried the newer, not outdated version of pgmpy, but the error remains.
+- I had issues with a frozenset error. It occurs once you enable the expert knowledge. But expert knowledge is quite powerful. I left it in a state where it works. I've also tried the newer, not outdated version of pgmpy, but the error remains.
+- I was able to fix it. It is an actual bug in the library of PC itself. It's an easy fix. Just replace in the library file at .venv/lib/python3.12/site-packages/pgmpy/estimators/PC.py the following lines:
+```python
+for X, Y in permutations(sorted(pdag.nodes()), 2):
+            if not skeleton.has_edge(X, Y):
+                for Z in set(skeleton.neighbors(X)) & set(skeleton.neighbors(Y)):
+                    if Z not in separating_sets[frozenset((X, Y))]:
+                        if (temporal_ordering == dict()) or (
+                            (temporal_ordering[Z] >= temporal_ordering[X])
+                            and (temporal_ordering[Z] >= temporal_ordering[Y])
+                        ):
+                            pdag.remove_edges_from([(Z, X), (Z, Y)])
+```
+
+by this here:
+```python
+for X, Y in permutations(sorted(pdag.nodes()), 2):
+    if not skeleton.has_edge(X, Y):
+        sep_set = separating_sets.get(frozenset((X, Y)))    # Fix frozen set bug
+        if sep_set is None:
+            continue
+
+        for Z in set(skeleton.neighbors(X)) & set(
+                skeleton.neighbors(Y)):
+            if Z not in sep_set:
+                if (temporal_ordering == dict()) or (
+                        (temporal_ordering[Z] >= temporal_ordering[X])
+                        and (temporal_ordering[Z] >= temporal_ordering[
+                    Y])
+                ):
+                    pdag.remove_edges_from([(Z, X), (Z, Y)])
+```
+
+Then restart the Kernel, and it should work.
+
+
+## Things to try:
+
+- Optional, because takes a lot of time (and we don't want to exaggerate): Use correlation_score, structure_score, and log_likelihood_score for comparing the models? Or so. Right now, we just look at the graph, but we don't really know how confident we can be
