@@ -1,0 +1,2195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
+    
+            <meta name="viewport" content="width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+                #map_7a594c734321ccc4684885dbcf193a24 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class="folium-map" id="map_7a594c734321ccc4684885dbcf193a24" ></div>
+        
+</body>
+<script>
+    
+    
+            var map_7a594c734321ccc4684885dbcf193a24 = L.map(
+                "map_7a594c734321ccc4684885dbcf193a24",
+                {
+                    center: [38.82, -77.22],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  "zoom": 11,
+  "zoomControl": true,
+  "preferCanvas": false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_684090ac8e60e1ee0638205d7c582b5c = L.tileLayer(
+                "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+                {
+  "minZoom": 0,
+  "maxZoom": 20,
+  "maxNativeZoom": 20,
+  "noWrap": false,
+  "attribution": "\u0026copy; \u003ca href=\"https://www.openstreetmap.org/copyright\"\u003eOpenStreetMap\u003c/a\u003e contributors \u0026copy; \u003ca href=\"https://carto.com/attributions\"\u003eCARTO\u003c/a\u003e",
+  "subdomains": "abcd",
+  "detectRetina": false,
+  "tms": false,
+  "opacity": 1,
+}
+
+            );
+        
+    
+            tile_layer_684090ac8e60e1ee0638205d7c582b5c.addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_6ab36880e49907db285d3faa164f6146 = L.polyline(
+                [[38.869, -77.051], [38.845, -77.063]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_a664165d3c501cd60074de4371961c36 = L.polyline(
+                [[38.869, -77.051], [38.868, -77.056]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_c0395bc4f6176e3ee077eb41f208af13 = L.polyline(
+                [[38.869, -77.051], [38.871, -77.063]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_e2194e447fb822cc32291acd78f11c71 = L.polyline(
+                [[38.869, -77.051], [38.896, -77.226]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_f832670ec1997d0ac80a7effc6898f5b = L.polyline(
+                [[38.845, -77.063], [38.82, -77.078]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_bf76d11c20b3eedf0883a5b033ae9b41 = L.polyline(
+                [[38.82, -77.078], [38.793, -77.095]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_fe2d28f5cb2bc094d65cc5831271b0a6 = L.polyline(
+                [[38.873, -77.069], [38.884, -77.109]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_79743bbf7a9aec83b5716e94ac68fe85 = L.polyline(
+                [[38.873, -77.069], [38.871, -77.074]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_7a5f1294dbd3fc4caa3e7ef7a658674c = L.polyline(
+                [[38.873, -77.069], [38.871, -77.063]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_f8c3c4dcaa9321820e682b218a78902e = L.polyline(
+                [[38.873, -77.069], [38.894, -77.232]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_a8eff2a631821523f87c724a9cb735b5 = L.polyline(
+                [[38.873, -77.069], [38.889, -77.235]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_da34726efb4ac64e32d0c5c0c7c2190c = L.polyline(
+                [[38.884, -77.109], [38.892, -77.226]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_54cf2361816c4f1e97dbe15e5c2130d6 = L.polyline(
+                [[38.892, -77.226], [38.878, -77.3]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_ccaf026c55716a0de4c7953783f27e1a = L.polyline(
+                [[38.793, -77.093], [38.769, -77.114]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_34a27b5c32aa35be8948f88cb20e19d3 = L.polyline(
+                [[38.793, -77.093], [38.821, -77.076]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_da27800f9ed07adbc246e6974da60f29 = L.polyline(
+                [[38.769, -77.114], [38.743, -77.14]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_9da769bee5981a074e163828935b0c12 = L.polyline(
+                [[38.821, -77.076], [38.846, -77.061]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_5669407c4f373b62c5bfbce221644853 = L.polyline(
+                [[38.715, -77.168], [38.743, -77.14]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_fc2b9ef2ef2d4fcf2bc9e47d5fbf2c81 = L.polyline(
+                [[38.846, -77.061], [38.868, -77.056]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_44ec86247e851195c0f78f7bddd1a6b2 = L.polyline(
+                [[38.868, -77.056], [38.871, -77.063]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_a090d2132cb7fa95e0a2e57110efac3b = L.polyline(
+                [[38.868, -77.056], [38.894, -77.232]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_071bd7d0bb9ac183dd7b5dbc0f6a908b = L.polyline(
+                [[38.868, -77.056], [38.889, -77.235]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_cdf649833728508c25a6db50db9bee3d = L.polyline(
+                [[38.789, -77.499], [38.828, -77.459]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_32e4262e2052210077174ed6652c0afd = L.polyline(
+                [[38.828, -77.459], [38.862, -77.409]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_a146513b10ed0582728ff6dc16111ceb = L.polyline(
+                [[38.862, -77.409], [38.876, -77.302]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_49de76ca21d2360c7919b1e61f1f6924 = L.polyline(
+                [[38.876, -77.302], [38.89, -77.229]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_30ee02334ca1296bfde7e06010583da9 = L.polyline(
+                [[38.89, -77.229], [38.882, -77.112]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_38844682afe602640dfb1c395d1a442c = L.polyline(
+                [[38.882, -77.112], [38.871, -77.074]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_f20a72aa9b29f8270855b682e95fc3fe = L.polyline(
+                [[38.871, -77.074], [38.871, -77.063]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_2186afb1594608904ea749905062eba8 = L.polyline(
+                [[38.871, -77.074], [38.896, -77.226]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_791acc60dd22e1ce064c5c22ef9454e9 = L.polyline(
+                [[38.876, -77.044], [38.875, -77.034]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_c3a168e2dff78c5ff4d87ccf66b6cc72 = L.polyline(
+                [[38.876, -77.044], [38.871, -77.063]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_b761e2bcab7aff5c3057c61bac360459 = L.polyline(
+                [[38.875, -77.034], [38.869, -77.059]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_d84cf3aecc754d4764ea0f39fab839a1 = L.polyline(
+                [[38.869, -77.059], [38.871, -77.063]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_aed6ce95e9c06c6a6150548d8741df2a = L.polyline(
+                [[38.871, -77.063], [38.896, -77.226]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_15c73a92f41a680b93c33f3d7abb18aa = L.polyline(
+                [[38.894, -77.232], [38.896, -77.226]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_4bd92d7a5298340d899b0b048a332ad4 = L.polyline(
+                [[38.937, -77.186], [38.921, -77.202]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_39e94e35a42a233c6675683f60d569d3 = L.polyline(
+                [[38.921, -77.202], [38.907, -77.215]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_7f83f635c2eb258b1a21761d62dbfda6 = L.polyline(
+                [[38.896, -77.226], [38.907, -77.215]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_145564a5f405652245c22f284dd91d23 = L.polyline(
+                [[38.813, -77.193], [38.814, -77.196]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_0050f142d0252be707afdece102060e0 = L.polyline(
+                [[38.813, -77.193], [38.847, -77.208]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_7141af47edc4b75ff7cc2b02398e1102 = L.polyline(
+                [[38.889, -77.235], [38.871, -77.219]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var poly_line_799dabfc92ebbb71c8b6c2e04eca79ea = L.polyline(
+                [[38.847, -77.208], [38.871, -77.219]],
+                {"bubblingMouseEvents": true, "color": "#666666", "dashArray": null, "dashOffset": null, "fill": false, "fillColor": "#666666", "fillOpacity": 0.2, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "noClip": false, "opacity": 0.45, "smoothFactor": 1.0, "stroke": true, "weight": 5.0}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var circle_marker_c1520962e44d829782486ae3f01d95de = L.circleMarker(
+                [38.869, -77.051],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#feb34d", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.971663177013397, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_973314d87a99840215391ae7075528fa = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_50421dc61c8477ad6aab307c2a71f7b6 = $(`<div id="html_50421dc61c8477ad6aab307c2a71f7b6" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 0</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>0</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.248</b><br>Morning rush (07–09): <b>0.330</b><br>Evening rush (17–19): <b>0.183</b><br>Off-peak (01–04):      <b>0.297</b></div></div>`)[0];
+                popup_973314d87a99840215391ae7075528fa.setContent(html_50421dc61c8477ad6aab307c2a71f7b6);
+            
+        
+
+        circle_marker_c1520962e44d829782486ae3f01d95de.bindPopup(popup_973314d87a99840215391ae7075528fa)
+        ;
+
+        
+    
+    
+            circle_marker_c1520962e44d829782486ae3f01d95de.bindTooltip(
+                `<div>
+                     S0 | Vol:0.25 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_d81a2970bc5bf1f15bc31eb85c58232d = L.marker(
+                [38.869, -77.051],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_2f911cfe90a42228d0010263970b9537 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e0\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_d81a2970bc5bf1f15bc31eb85c58232d.setIcon(div_icon_2f911cfe90a42228d0010263970b9537);
+            
+    
+            var circle_marker_2c5f9a52c9d7baca2bc3a47e382e2b89 = L.circleMarker(
+                [38.845, -77.063],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fb4b29", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.245136499404907, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_98478dbd4b51b6c06249e9f8a546da72 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_5e727d1a0aaf7dde90d208db650c9963 = $(`<div id="html_5e727d1a0aaf7dde90d208db650c9963" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 1</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>0</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.354</b><br>Morning rush (07–09): <b>0.448</b><br>Evening rush (17–19): <b>0.264</b><br>Off-peak (01–04):      <b>0.434</b></div></div>`)[0];
+                popup_98478dbd4b51b6c06249e9f8a546da72.setContent(html_5e727d1a0aaf7dde90d208db650c9963);
+            
+        
+
+        circle_marker_2c5f9a52c9d7baca2bc3a47e382e2b89.bindPopup(popup_98478dbd4b51b6c06249e9f8a546da72)
+        ;
+
+        
+    
+    
+            circle_marker_2c5f9a52c9d7baca2bc3a47e382e2b89.bindTooltip(
+                `<div>
+                     S1 | Vol:0.35 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_df03daef59fa962a9a9160edd71329bf = L.marker(
+                [38.845, -77.063],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_21707da990d1d30b47537ab2275dd609 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e1\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_df03daef59fa962a9a9160edd71329bf.setIcon(div_icon_21707da990d1d30b47537ab2275dd609);
+            
+    
+            var circle_marker_674e96bd816ee1d96ed56ba50f856d71 = L.circleMarker(
+                [38.82, -77.078],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#feca66", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.601245641708374, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_239cfb3479aab26eca0a38d8dbcb98b8 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_dec06b6ff71e81ddabb46644ad8d653a = $(`<div id="html_dec06b6ff71e81ddabb46644ad8d653a" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 2</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>0</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.217</b><br>Morning rush (07–09): <b>0.272</b><br>Evening rush (17–19): <b>0.207</b><br>Off-peak (01–04):      <b>0.249</b></div></div>`)[0];
+                popup_239cfb3479aab26eca0a38d8dbcb98b8.setContent(html_dec06b6ff71e81ddabb46644ad8d653a);
+            
+        
+
+        circle_marker_674e96bd816ee1d96ed56ba50f856d71.bindPopup(popup_239cfb3479aab26eca0a38d8dbcb98b8)
+        ;
+
+        
+    
+    
+            circle_marker_674e96bd816ee1d96ed56ba50f856d71.bindTooltip(
+                `<div>
+                     S2 | Vol:0.22 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_913b88062d475b10940b0b12e754845b = L.marker(
+                [38.82, -77.078],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_ae511911efac74a898b7e4406edf286b = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e2\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_913b88062d475b10940b0b12e754845b.setIcon(div_icon_ae511911efac74a898b7e4406edf286b);
+            
+    
+            var circle_marker_c7e4e690e189e6f5fa7e5ba43935366c = L.circleMarker(
+                [38.793, -77.095],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#feab49", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.114239931106567, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_a82270f8c8de3ea596d50945429a0cf4 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_b00c49e864b8c8596e23339eb5d8e727 = $(`<div id="html_b00c49e864b8c8596e23339eb5d8e727" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 3</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>0</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.260</b><br>Morning rush (07–09): <b>0.325</b><br>Evening rush (17–19): <b>0.248</b><br>Off-peak (01–04):      <b>0.274</b></div></div>`)[0];
+                popup_a82270f8c8de3ea596d50945429a0cf4.setContent(html_b00c49e864b8c8596e23339eb5d8e727);
+            
+        
+
+        circle_marker_c7e4e690e189e6f5fa7e5ba43935366c.bindPopup(popup_a82270f8c8de3ea596d50945429a0cf4)
+        ;
+
+        
+    
+    
+            circle_marker_c7e4e690e189e6f5fa7e5ba43935366c.bindTooltip(
+                `<div>
+                     S3 | Vol:0.26 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_9a283f084a6b0f2054d5dbc4a8e47934 = L.marker(
+                [38.793, -77.095],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_18480a16875ebdf345f7cf3becefc53c = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e3\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_9a283f084a6b0f2054d5dbc4a8e47934.setIcon(div_icon_18480a16875ebdf345f7cf3becefc53c);
+            
+    
+            var circle_marker_5539d3043f8b0450eb20ea2bc7362078 = L.circleMarker(
+                [38.873, -77.069],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f74327", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.345037698745728, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_f5a9ddb70ba7672bd5d3b8dd3c93e309 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_29e6fe7457085400afe185f2628a31a7 = $(`<div id="html_29e6fe7457085400afe185f2628a31a7" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 4</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>0</b> | Lanes: <b>5</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.362</b><br>Morning rush (07–09): <b>0.433</b><br>Evening rush (17–19): <b>0.370</b><br>Off-peak (01–04):      <b>0.217</b></div></div>`)[0];
+                popup_f5a9ddb70ba7672bd5d3b8dd3c93e309.setContent(html_29e6fe7457085400afe185f2628a31a7);
+            
+        
+
+        circle_marker_5539d3043f8b0450eb20ea2bc7362078.bindPopup(popup_f5a9ddb70ba7672bd5d3b8dd3c93e309)
+        ;
+
+        
+    
+    
+            circle_marker_5539d3043f8b0450eb20ea2bc7362078.bindTooltip(
+                `<div>
+                     S4 | Vol:0.36 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e155fa7ce14980552455235bfce8e5ae = L.marker(
+                [38.873, -77.069],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_f6fd994be7d4040c270b7e358627d3a1 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e4\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_e155fa7ce14980552455235bfce8e5ae.setIcon(div_icon_f6fd994be7d4040c270b7e358627d3a1);
+            
+    
+            var circle_marker_2a9f7ba29e27cf2f335399bebc6e6694 = L.circleMarker(
+                [38.884, -77.109],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fd7636", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.82146692276001, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_24b5b0ccae4f1ceb590cc0edd8d6c995 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_e8a28b4e5f494e880ea5a2b1f4458c62 = $(`<div id="html_e8a28b4e5f494e880ea5a2b1f4458c62" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 5</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>0</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.318</b><br>Morning rush (07–09): <b>0.382</b><br>Evening rush (17–19): <b>0.329</b><br>Off-peak (01–04):      <b>0.192</b></div></div>`)[0];
+                popup_24b5b0ccae4f1ceb590cc0edd8d6c995.setContent(html_e8a28b4e5f494e880ea5a2b1f4458c62);
+            
+        
+
+        circle_marker_2a9f7ba29e27cf2f335399bebc6e6694.bindPopup(popup_24b5b0ccae4f1ceb590cc0edd8d6c995)
+        ;
+
+        
+    
+    
+            circle_marker_2a9f7ba29e27cf2f335399bebc6e6694.bindTooltip(
+                `<div>
+                     S5 | Vol:0.32 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0f32a1ba2b989498261ed9e92b2a5236 = L.marker(
+                [38.884, -77.109],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_7b6fd9430ba2432b9b8bc55f0e0a2160 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e5\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_0f32a1ba2b989498261ed9e92b2a5236.setIcon(div_icon_7b6fd9430ba2432b9b8bc55f0e0a2160);
+            
+    
+            var circle_marker_e3f8c80ef84b9a16ec7bcaa687c61f46 = L.circleMarker(
+                [38.892, -77.226],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f74327", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.33677077293396, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_67b05b94765ddaba0435ea6ecba99f68 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_e7c7bc20a856502b3b681ff51c3936bb = $(`<div id="html_e7c7bc20a856502b3b681ff51c3936bb" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 6</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>0</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.361</b><br>Morning rush (07–09): <b>0.430</b><br>Evening rush (17–19): <b>0.364</b><br>Off-peak (01–04):      <b>0.223</b></div></div>`)[0];
+                popup_67b05b94765ddaba0435ea6ecba99f68.setContent(html_e7c7bc20a856502b3b681ff51c3936bb);
+            
+        
+
+        circle_marker_e3f8c80ef84b9a16ec7bcaa687c61f46.bindPopup(popup_67b05b94765ddaba0435ea6ecba99f68)
+        ;
+
+        
+    
+    
+            circle_marker_e3f8c80ef84b9a16ec7bcaa687c61f46.bindTooltip(
+                `<div>
+                     S6 | Vol:0.36 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_0d61aa42bbe8537279e446825b311b6c = L.marker(
+                [38.892, -77.226],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_807d044bc278bd3f6b11ad359e90d81e = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e6\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_0d61aa42bbe8537279e446825b311b6c.setIcon(div_icon_807d044bc278bd3f6b11ad359e90d81e);
+            
+    
+            var circle_marker_6578401bba8528bb22ab19eed14cb11b = L.circleMarker(
+                [38.878, -77.3],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fea546", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.198522448539734, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_07c57345ef0b9043fd94231867378496 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_7c279812ece42d5195b26bad2b0f7158 = $(`<div id="html_7c279812ece42d5195b26bad2b0f7158" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 7</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>0</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.267</b><br>Morning rush (07–09): <b>0.328</b><br>Evening rush (17–19): <b>0.245</b><br>Off-peak (01–04):      <b>0.218</b></div></div>`)[0];
+                popup_07c57345ef0b9043fd94231867378496.setContent(html_7c279812ece42d5195b26bad2b0f7158);
+            
+        
+
+        circle_marker_6578401bba8528bb22ab19eed14cb11b.bindPopup(popup_07c57345ef0b9043fd94231867378496)
+        ;
+
+        
+    
+    
+            circle_marker_6578401bba8528bb22ab19eed14cb11b.bindTooltip(
+                `<div>
+                     S7 | Vol:0.27 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ca6f92bdc8b758430ee7337b3828933d = L.marker(
+                [38.878, -77.3],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_e4e658ad97d7e890890a1b1941199eb8 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e7\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_ca6f92bdc8b758430ee7337b3828933d.setIcon(div_icon_e4e658ad97d7e890890a1b1941199eb8);
+            
+    
+            var circle_marker_02537b4a2771ac227093c485705d6d16 = L.circleMarker(
+                [38.793, -77.093],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e9261f", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.692850112915039, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_0dc3de5d682b7e086d227a3f71f1c5ba = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_64dd5d9d1bfc3e93af0db1355f34f565 = $(`<div id="html_64dd5d9d1bfc3e93af0db1355f34f565" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 8</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.391</b><br>Morning rush (07–09): <b>0.492</b><br>Evening rush (17–19): <b>0.288</b><br>Off-peak (01–04):      <b>0.514</b></div></div>`)[0];
+                popup_0dc3de5d682b7e086d227a3f71f1c5ba.setContent(html_64dd5d9d1bfc3e93af0db1355f34f565);
+            
+        
+
+        circle_marker_02537b4a2771ac227093c485705d6d16.bindPopup(popup_0dc3de5d682b7e086d227a3f71f1c5ba)
+        ;
+
+        
+    
+    
+            circle_marker_02537b4a2771ac227093c485705d6d16.bindTooltip(
+                `<div>
+                     S8 | Vol:0.39 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_807a372d3a435ff693848147905aabde = L.marker(
+                [38.793, -77.093],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_5b189803c09fce68730a40a5c0999575 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e8\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_807a372d3a435ff693848147905aabde.setIcon(div_icon_5b189803c09fce68730a40a5c0999575);
+            
+    
+            var circle_marker_ff2f4f7d2a935f316b51001fab7bcfc9 = L.circleMarker(
+                [38.769, -77.114],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#c70723", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.279842972755432, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_4a3749a679e68e670a66d894970b622d = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_daba0b5090f0bd1858196670ac610902 = $(`<div id="html_daba0b5090f0bd1858196670ac610902" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 9</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.440</b><br>Morning rush (07–09): <b>0.558</b><br>Evening rush (17–19): <b>0.321</b><br>Off-peak (01–04):      <b>0.581</b></div></div>`)[0];
+                popup_4a3749a679e68e670a66d894970b622d.setContent(html_daba0b5090f0bd1858196670ac610902);
+            
+        
+
+        circle_marker_ff2f4f7d2a935f316b51001fab7bcfc9.bindPopup(popup_4a3749a679e68e670a66d894970b622d)
+        ;
+
+        
+    
+    
+            circle_marker_ff2f4f7d2a935f316b51001fab7bcfc9.bindTooltip(
+                `<div>
+                     S9 | Vol:0.44 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_441f8b84c8fa8fa1c5f3414398e35f15 = L.marker(
+                [38.769, -77.114],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_ae1322dcd9d90e3b26e03cd9c8a968ec = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e9\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_441f8b84c8fa8fa1c5f3414398e35f15.setIcon(div_icon_ae1322dcd9d90e3b26e03cd9c8a968ec);
+            
+    
+            var circle_marker_a04336eb78f5cfe7bb3640179b8ccea2 = L.circleMarker(
+                [38.821, -77.076],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e0181d", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.872701525688171, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_93691b70f70f84ab4b004a3b6d088116 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_94956e69b9d92107f94117bd4b0e3206 = $(`<div id="html_94956e69b9d92107f94117bd4b0e3206" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 10</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.406</b><br>Morning rush (07–09): <b>0.522</b><br>Evening rush (17–19): <b>0.292</b><br>Off-peak (01–04):      <b>0.531</b></div></div>`)[0];
+                popup_93691b70f70f84ab4b004a3b6d088116.setContent(html_94956e69b9d92107f94117bd4b0e3206);
+            
+        
+
+        circle_marker_a04336eb78f5cfe7bb3640179b8ccea2.bindPopup(popup_93691b70f70f84ab4b004a3b6d088116)
+        ;
+
+        
+    
+    
+            circle_marker_a04336eb78f5cfe7bb3640179b8ccea2.bindTooltip(
+                `<div>
+                     S10 | Vol:0.41 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b592a2e74f5a762704ccb33b0786ce52 = L.marker(
+                [38.821, -77.076],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_f278a131d2dc0ee9a5bb8c9c56a0b52b = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e10\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_b592a2e74f5a762704ccb33b0786ce52.setIcon(div_icon_f278a131d2dc0ee9a5bb8c9c56a0b52b);
+            
+    
+            var circle_marker_3f8153dc042e903edb1aff7af7c7057e = L.circleMarker(
+                [38.715, -77.168],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fc6330", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.004745483398438, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_5436c3dea38d427a8513338ad9bc0d6d = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_72cdc5096bab1ca2bc3d271279a4b5cf = $(`<div id="html_72cdc5096bab1ca2bc3d271279a4b5cf" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 11</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>1</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.334</b><br>Morning rush (07–09): <b>0.395</b><br>Evening rush (17–19): <b>0.239</b><br>Off-peak (01–04):      <b>0.405</b></div></div>`)[0];
+                popup_5436c3dea38d427a8513338ad9bc0d6d.setContent(html_72cdc5096bab1ca2bc3d271279a4b5cf);
+            
+        
+
+        circle_marker_3f8153dc042e903edb1aff7af7c7057e.bindPopup(popup_5436c3dea38d427a8513338ad9bc0d6d)
+        ;
+
+        
+    
+    
+            circle_marker_3f8153dc042e903edb1aff7af7c7057e.bindTooltip(
+                `<div>
+                     S11 | Vol:0.33 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_f5caed64d7cc300bd135bffc8b4478d8 = L.marker(
+                [38.715, -77.168],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_ae9a4a2b677847c89935ef295a0cf8b0 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e11\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_f5caed64d7cc300bd135bffc8b4478d8.setIcon(div_icon_ae9a4a2b677847c89935ef295a0cf8b0);
+            
+    
+            var circle_marker_19f7f5ca5bb046628966c6b02e56def1 = L.circleMarker(
+                [38.743, -77.14],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e2191c", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.837953686714172, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_d7a22a00375b744ef48a8780135c197a = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_2dd99e6994c951643a17b36b902cd928 = $(`<div id="html_2dd99e6994c951643a17b36b902cd928" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 12</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.403</b><br>Morning rush (07–09): <b>0.513</b><br>Evening rush (17–19): <b>0.305</b><br>Off-peak (01–04):      <b>0.517</b></div></div>`)[0];
+                popup_d7a22a00375b744ef48a8780135c197a.setContent(html_2dd99e6994c951643a17b36b902cd928);
+            
+        
+
+        circle_marker_19f7f5ca5bb046628966c6b02e56def1.bindPopup(popup_d7a22a00375b744ef48a8780135c197a)
+        ;
+
+        
+    
+    
+            circle_marker_19f7f5ca5bb046628966c6b02e56def1.bindTooltip(
+                `<div>
+                     S12 | Vol:0.40 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_66468bd5ebbec337a5c37c0357a25c8b = L.marker(
+                [38.743, -77.14],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_7b57cf9cec9df6aacefbee73d54bbf1d = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e12\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_66468bd5ebbec337a5c37c0357a25c8b.setIcon(div_icon_7b57cf9cec9df6aacefbee73d54bbf1d);
+            
+    
+            var circle_marker_bcbb7fac7336cefd5c7663ddf79a31dd = L.circleMarker(
+                [38.846, -77.061],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#db141e", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.95128309726715, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_de62ca8881074abd0e42e321105228fe = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_13163c2ddaf9d515b290c5a7f4b515ae = $(`<div id="html_13163c2ddaf9d515b290c5a7f4b515ae" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 13</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.413</b><br>Morning rush (07–09): <b>0.526</b><br>Evening rush (17–19): <b>0.294</b><br>Off-peak (01–04):      <b>0.544</b></div></div>`)[0];
+                popup_de62ca8881074abd0e42e321105228fe.setContent(html_13163c2ddaf9d515b290c5a7f4b515ae);
+            
+        
+
+        circle_marker_bcbb7fac7336cefd5c7663ddf79a31dd.bindPopup(popup_de62ca8881074abd0e42e321105228fe)
+        ;
+
+        
+    
+    
+            circle_marker_bcbb7fac7336cefd5c7663ddf79a31dd.bindTooltip(
+                `<div>
+                     S13 | Vol:0.41 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_43c558386f9468472c0f7b17f5308ad9 = L.marker(
+                [38.846, -77.061],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_3cacd9e5e63dd441cf9902b986a5dbc0 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e13\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_43c558386f9468472c0f7b17f5308ad9.setIcon(div_icon_3cacd9e5e63dd441cf9902b986a5dbc0);
+            
+    
+            var circle_marker_2327c70405107f779ced004b0d6e27c2 = L.circleMarker(
+                [38.868, -77.056],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#800026", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 12.065239906311035, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_87512f1db3865760b0650a8b04213b90 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_94c57699e16423dd76b20feb42f54889 = $(`<div id="html_94c57699e16423dd76b20feb42f54889" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 14</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.505</b><br>Morning rush (07–09): <b>0.667</b><br>Evening rush (17–19): <b>0.369</b><br>Off-peak (01–04):      <b>0.593</b></div></div>`)[0];
+                popup_87512f1db3865760b0650a8b04213b90.setContent(html_94c57699e16423dd76b20feb42f54889);
+            
+        
+
+        circle_marker_2327c70405107f779ced004b0d6e27c2.bindPopup(popup_87512f1db3865760b0650a8b04213b90)
+        ;
+
+        
+    
+    
+            circle_marker_2327c70405107f779ced004b0d6e27c2.bindTooltip(
+                `<div>
+                     S14 | Vol:0.51 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b11b75cd420ed582c8e17e31e307c2b0 = L.marker(
+                [38.868, -77.056],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_4d62eac2c719259cf5dabd814250cb28 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e14\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_b11b75cd420ed582c8e17e31e307c2b0.setIcon(div_icon_4d62eac2c719259cf5dabd814250cb28);
+            
+    
+            var circle_marker_6c3be805fadb50657c9cb0a2bbd24c7c = L.circleMarker(
+                [38.789, -77.499],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fed977", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.35571140050888, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_1d29730ec2b477af42f28eec31880d38 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_8f740ac9d51d9a46aeff317380c3ac9b = $(`<div id="html_8f740ac9d51d9a46aeff317380c3ac9b" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 15</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>1</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.196</b><br>Morning rush (07–09): <b>0.201</b><br>Evening rush (17–19): <b>0.182</b><br>Off-peak (01–04):      <b>0.175</b></div></div>`)[0];
+                popup_1d29730ec2b477af42f28eec31880d38.setContent(html_8f740ac9d51d9a46aeff317380c3ac9b);
+            
+        
+
+        circle_marker_6c3be805fadb50657c9cb0a2bbd24c7c.bindPopup(popup_1d29730ec2b477af42f28eec31880d38)
+        ;
+
+        
+    
+    
+            circle_marker_6c3be805fadb50657c9cb0a2bbd24c7c.bindTooltip(
+                `<div>
+                     S15 | Vol:0.20 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_ff3823cc3beb41cd8713f1221661a3e8 = L.marker(
+                [38.789, -77.499],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_4d5d29d400e5d2ba614508a1107e9c47 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e15\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_ff3823cc3beb41cd8713f1221661a3e8.setIcon(div_icon_4d5d29d400e5d2ba614508a1107e9c47);
+            
+    
+            var circle_marker_5a29b538f9c44c1674925eeae07a1647 = L.circleMarker(
+                [38.828, -77.459],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fd953f", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.469359397888184, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_c0a1706e007623eb8faad57cf8d262f5 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_9a38c435fb4be311f1da12a6d9bf34fe = $(`<div id="html_9a38c435fb4be311f1da12a6d9bf34fe" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 16</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>1</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.289</b><br>Morning rush (07–09): <b>0.375</b><br>Evening rush (17–19): <b>0.319</b><br>Off-peak (01–04):      <b>0.193</b></div></div>`)[0];
+                popup_c0a1706e007623eb8faad57cf8d262f5.setContent(html_9a38c435fb4be311f1da12a6d9bf34fe);
+            
+        
+
+        circle_marker_5a29b538f9c44c1674925eeae07a1647.bindPopup(popup_c0a1706e007623eb8faad57cf8d262f5)
+        ;
+
+        
+    
+    
+            circle_marker_5a29b538f9c44c1674925eeae07a1647.bindTooltip(
+                `<div>
+                     S16 | Vol:0.29 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_302741e6c2da6a61240793ef834d718e = L.marker(
+                [38.828, -77.459],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_963d29afb37d3497eedeb6ae756ea1b0 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e16\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_302741e6c2da6a61240793ef834d718e.setIcon(div_icon_963d29afb37d3497eedeb6ae756ea1b0);
+            
+    
+            var circle_marker_5a9b72f4fc2e397e2a4dd12a009f5638 = L.circleMarker(
+                [38.862, -77.409],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fd8038", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.716620445251465, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_11cd567a43823eccbad537fd4a77a1cc = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_9a22e67b4e7abcdf6d69deb2d75ca7a4 = $(`<div id="html_9a22e67b4e7abcdf6d69deb2d75ca7a4" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 17</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.310</b><br>Morning rush (07–09): <b>0.391</b><br>Evening rush (17–19): <b>0.351</b><br>Off-peak (01–04):      <b>0.199</b></div></div>`)[0];
+                popup_11cd567a43823eccbad537fd4a77a1cc.setContent(html_9a22e67b4e7abcdf6d69deb2d75ca7a4);
+            
+        
+
+        circle_marker_5a9b72f4fc2e397e2a4dd12a009f5638.bindPopup(popup_11cd567a43823eccbad537fd4a77a1cc)
+        ;
+
+        
+    
+    
+            circle_marker_5a9b72f4fc2e397e2a4dd12a009f5638.bindTooltip(
+                `<div>
+                     S17 | Vol:0.31 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b1108b7e1c6bc2ee7c9687fe35091a86 = L.marker(
+                [38.862, -77.409],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_a4c4ac1578cafa4d04bc118df4814cfc = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e17\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_b1108b7e1c6bc2ee7c9687fe35091a86.setIcon(div_icon_a4c4ac1578cafa4d04bc118df4814cfc);
+            
+    
+            var circle_marker_3dd624a018c570a7fd425a016d2189f1 = L.circleMarker(
+                [38.876, -77.302],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fd8439", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.68156611919403, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_5a382f2ecee4d369339e63cc70085c53 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_e08fd54f22d6471498b073d253edc32c = $(`<div id="html_e08fd54f22d6471498b073d253edc32c" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 18</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.307</b><br>Morning rush (07–09): <b>0.391</b><br>Evening rush (17–19): <b>0.341</b><br>Off-peak (01–04):      <b>0.194</b></div></div>`)[0];
+                popup_5a382f2ecee4d369339e63cc70085c53.setContent(html_e08fd54f22d6471498b073d253edc32c);
+            
+        
+
+        circle_marker_3dd624a018c570a7fd425a016d2189f1.bindPopup(popup_5a382f2ecee4d369339e63cc70085c53)
+        ;
+
+        
+    
+    
+            circle_marker_3dd624a018c570a7fd425a016d2189f1.bindTooltip(
+                `<div>
+                     S18 | Vol:0.31 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4c1583e93b37caf65bcdbc83e2b57516 = L.marker(
+                [38.876, -77.302],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_a0744e3e6e25a101d679110d234fbb2a = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e18\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_4c1583e93b37caf65bcdbc83e2b57516.setIcon(div_icon_a0744e3e6e25a101d679110d234fbb2a);
+            
+    
+            var circle_marker_31d7ee52ddfabceb950e30e67b164d20 = L.circleMarker(
+                [38.89, -77.229],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#e41c1d", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.811131238937378, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_bed842c7e9c8eff28d122f2b5e1ece77 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_a25b92c83ba83d79be9bd4cb443bf114 = $(`<div id="html_a25b92c83ba83d79be9bd4cb443bf114" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 19</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.401</b><br>Morning rush (07–09): <b>0.502</b><br>Evening rush (17–19): <b>0.442</b><br>Off-peak (01–04):      <b>0.248</b></div></div>`)[0];
+                popup_bed842c7e9c8eff28d122f2b5e1ece77.setContent(html_a25b92c83ba83d79be9bd4cb443bf114);
+            
+        
+
+        circle_marker_31d7ee52ddfabceb950e30e67b164d20.bindPopup(popup_bed842c7e9c8eff28d122f2b5e1ece77)
+        ;
+
+        
+    
+    
+            circle_marker_31d7ee52ddfabceb950e30e67b164d20.bindTooltip(
+                `<div>
+                     S19 | Vol:0.40 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e66346859a43c21f3aa6e04f3cdf19a1 = L.marker(
+                [38.89, -77.229],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_9cadc277abf4bb4a7911c032e22904f5 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e19\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_e66346859a43c21f3aa6e04f3cdf19a1.setIcon(div_icon_9cadc277abf4bb4a7911c032e22904f5);
+            
+    
+            var circle_marker_cb74ad5f88d25358a3f1827257b79bef = L.circleMarker(
+                [38.882, -77.112],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f03523", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.517953991889954, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_b4bb099e140920f5f527c9ea0982db78 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_0b8073c7deac1fe9609cf7ec5b0e9599 = $(`<div id="html_0b8073c7deac1fe9609cf7ec5b0e9599" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 20</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.376</b><br>Morning rush (07–09): <b>0.470</b><br>Evening rush (17–19): <b>0.420</b><br>Off-peak (01–04):      <b>0.234</b></div></div>`)[0];
+                popup_b4bb099e140920f5f527c9ea0982db78.setContent(html_0b8073c7deac1fe9609cf7ec5b0e9599);
+            
+        
+
+        circle_marker_cb74ad5f88d25358a3f1827257b79bef.bindPopup(popup_b4bb099e140920f5f527c9ea0982db78)
+        ;
+
+        
+    
+    
+            circle_marker_cb74ad5f88d25358a3f1827257b79bef.bindTooltip(
+                `<div>
+                     S20 | Vol:0.38 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_aa5659f1528ec4843be0718973733cee = L.marker(
+                [38.882, -77.112],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_641b5550392eabe84b22dc62ae88c988 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e20\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_aa5659f1528ec4843be0718973733cee.setIcon(div_icon_641b5550392eabe84b22dc62ae88c988);
+            
+    
+            var circle_marker_7380caf62d0665b76500ce8ecf21ba33 = L.circleMarker(
+                [38.871, -77.074],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#d9131f", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.004739880561829, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_f2f6a174c6ca671310470b186bc871fa = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_8d6cd69be242feb3fde9bb96f6269d29 = $(`<div id="html_8d6cd69be242feb3fde9bb96f6269d29" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 21</b><br>Road: <b>Road-1 (I-66)</b><br>Direction class: <b>1</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.417</b><br>Morning rush (07–09): <b>0.513</b><br>Evening rush (17–19): <b>0.465</b><br>Off-peak (01–04):      <b>0.270</b></div></div>`)[0];
+                popup_f2f6a174c6ca671310470b186bc871fa.setContent(html_8d6cd69be242feb3fde9bb96f6269d29);
+            
+        
+
+        circle_marker_7380caf62d0665b76500ce8ecf21ba33.bindPopup(popup_f2f6a174c6ca671310470b186bc871fa)
+        ;
+
+        
+    
+    
+            circle_marker_7380caf62d0665b76500ce8ecf21ba33.bindTooltip(
+                `<div>
+                     S21 | Vol:0.42 | Road-1 (I-66)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_164902e525f4e277a9982aef95f11fb6 = L.marker(
+                [38.871, -77.074],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_6381942f17e74af0fd0a28fe350c2a9f = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e21\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_164902e525f4e277a9982aef95f11fb6.setIcon(div_icon_6381942f17e74af0fd0a28fe350c2a9f);
+            
+    
+            var circle_marker_72b7098b73c773b6df29d54829923429 = L.circleMarker(
+                [38.876, -77.044],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fedd7e", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.250608682632446, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_bd8b20de503d21dde7b17ac210961bad = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_4a0abf89fc629a02bc5d763fec091da4 = $(`<div id="html_4a0abf89fc629a02bc5d763fec091da4" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 22</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>2</b> | Lanes: <b>2</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.188</b><br>Morning rush (07–09): <b>0.195</b><br>Evening rush (17–19): <b>0.154</b><br>Off-peak (01–04):      <b>0.192</b></div></div>`)[0];
+                popup_bd8b20de503d21dde7b17ac210961bad.setContent(html_4a0abf89fc629a02bc5d763fec091da4);
+            
+        
+
+        circle_marker_72b7098b73c773b6df29d54829923429.bindPopup(popup_bd8b20de503d21dde7b17ac210961bad)
+        ;
+
+        
+    
+    
+            circle_marker_72b7098b73c773b6df29d54829923429.bindTooltip(
+                `<div>
+                     S22 | Vol:0.19 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_e6803ae8a793ab6a972cc477231041ab = L.marker(
+                [38.876, -77.044],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_7fce290e6b437524d0af0ce0c602639c = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e22\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_e6803ae8a793ab6a972cc477231041ab.setIcon(div_icon_7fce290e6b437524d0af0ce0c602639c);
+            
+    
+            var circle_marker_fdfa6f4fea47ea3915a88864765c66e2 = L.circleMarker(
+                [38.875, -77.034],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffe48c", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.05349189043045, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_6234982b6c77143d1b802366f5bbf46e = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_88f27d335a8c20cdc17ce3c359a180ce = $(`<div id="html_88f27d335a8c20cdc17ce3c359a180ce" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 23</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>2</b> | Lanes: <b>2</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.171</b><br>Morning rush (07–09): <b>0.212</b><br>Evening rush (17–19): <b>0.134</b><br>Off-peak (01–04):      <b>0.164</b></div></div>`)[0];
+                popup_6234982b6c77143d1b802366f5bbf46e.setContent(html_88f27d335a8c20cdc17ce3c359a180ce);
+            
+        
+
+        circle_marker_fdfa6f4fea47ea3915a88864765c66e2.bindPopup(popup_6234982b6c77143d1b802366f5bbf46e)
+        ;
+
+        
+    
+    
+            circle_marker_fdfa6f4fea47ea3915a88864765c66e2.bindTooltip(
+                `<div>
+                     S23 | Vol:0.17 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_4fe6e8afe44782b6e1c51f4cf3767396 = L.marker(
+                [38.875, -77.034],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_ec2f4fed75b765a17897948371f603ef = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e23\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_4fe6e8afe44782b6e1c51f4cf3767396.setIcon(div_icon_ec2f4fed75b765a17897948371f603ef);
+            
+    
+            var circle_marker_af929aa582552fb2004c814f585ca07a = L.circleMarker(
+                [38.869, -77.059],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffffcc", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.130424052476883, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_ddbf80f874b058d827952eafc3fb8db7 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_4f7ef22e3fa7adfd01905a8f0c868bf3 = $(`<div id="html_4f7ef22e3fa7adfd01905a8f0c868bf3" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 24</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>2</b> | Lanes: <b>1</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.094</b><br>Morning rush (07–09): <b>0.094</b><br>Evening rush (17–19): <b>0.071</b><br>Off-peak (01–04):      <b>0.101</b></div></div>`)[0];
+                popup_ddbf80f874b058d827952eafc3fb8db7.setContent(html_4f7ef22e3fa7adfd01905a8f0c868bf3);
+            
+        
+
+        circle_marker_af929aa582552fb2004c814f585ca07a.bindPopup(popup_ddbf80f874b058d827952eafc3fb8db7)
+        ;
+
+        
+    
+    
+            circle_marker_af929aa582552fb2004c814f585ca07a.bindTooltip(
+                `<div>
+                     S24 | Vol:0.09 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_717f6b2fb7d09d0f0c5cd03aa440c95b = L.marker(
+                [38.869, -77.059],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_9800024355e42b95b79f4528bd4cc9b5 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e24\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_717f6b2fb7d09d0f0c5cd03aa440c95b.setIcon(div_icon_9800024355e42b95b79f4528bd4cc9b5);
+            
+    
+            var circle_marker_db33072fdabfe0c94a19ddb3e7df5f90 = L.circleMarker(
+                [38.871, -77.063],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#a20026", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 11.712127447128296, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_ed06c27aa96f7f441e2df12c1e05dede = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_0a430bc456501ceaebc54a5a53f26339 = $(`<div id="html_0a430bc456501ceaebc54a5a53f26339" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 25</b><br>Road: <b>Road-0 (I-95 main)</b><br>Direction class: <b>2</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.476</b><br>Morning rush (07–09): <b>0.566</b><br>Evening rush (17–19): <b>0.354</b><br>Off-peak (01–04):      <b>0.467</b></div></div>`)[0];
+                popup_ed06c27aa96f7f441e2df12c1e05dede.setContent(html_0a430bc456501ceaebc54a5a53f26339);
+            
+        
+
+        circle_marker_db33072fdabfe0c94a19ddb3e7df5f90.bindPopup(popup_ed06c27aa96f7f441e2df12c1e05dede)
+        ;
+
+        
+    
+    
+            circle_marker_db33072fdabfe0c94a19ddb3e7df5f90.bindTooltip(
+                `<div>
+                     S25 | Vol:0.48 | Road-0 (I-95 main)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_9b66d25fef4c4e55739bf4879b45150a = L.marker(
+                [38.871, -77.063],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_3878de2b11dd77d2abb0f1530db5b186 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e25\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_9b66d25fef4c4e55739bf4879b45150a.setIcon(div_icon_3878de2b11dd77d2abb0f1530db5b186);
+            
+    
+            var circle_marker_9f80709c4e0ab6061696f6f1639cb868 = L.circleMarker(
+                [38.894, -77.232],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#feae4a", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 9.04270327091217, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_e9bda7b66ca189052fd50e2501cf1c1a = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_8b89cad7146825672172b1f47f2ccd64 = $(`<div id="html_8b89cad7146825672172b1f47f2ccd64" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 26</b><br>Road: <b>Road-2 (connector N)</b><br>Direction class: <b>3</b> | Lanes: <b>2</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.254</b><br>Morning rush (07–09): <b>0.342</b><br>Evening rush (17–19): <b>0.216</b><br>Off-peak (01–04):      <b>0.248</b></div></div>`)[0];
+                popup_e9bda7b66ca189052fd50e2501cf1c1a.setContent(html_8b89cad7146825672172b1f47f2ccd64);
+            
+        
+
+        circle_marker_9f80709c4e0ab6061696f6f1639cb868.bindPopup(popup_e9bda7b66ca189052fd50e2501cf1c1a)
+        ;
+
+        
+    
+    
+            circle_marker_9f80709c4e0ab6061696f6f1639cb868.bindTooltip(
+                `<div>
+                     S26 | Vol:0.25 | Road-2 (connector N)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6e81a86736bb94e32a9222a5e476051a = L.marker(
+                [38.894, -77.232],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_f4ef6289a0185569145d675257f5419f = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e26\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_6e81a86736bb94e32a9222a5e476051a.setIcon(div_icon_f4ef6289a0185569145d675257f5419f);
+            
+    
+            var circle_marker_fc75af72062913eb5f54574d150d9edf = L.circleMarker(
+                [38.937, -77.186],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#ffe48c", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.051809787750244, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_875428a1226531c794d9c8f02e1f010b = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_297cdc9459f857b99828ee64db13b1db = $(`<div id="html_297cdc9459f857b99828ee64db13b1db" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 27</b><br>Road: <b>Road-2 (connector N)</b><br>Direction class: <b>3</b> | Lanes: <b>5</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.171</b><br>Morning rush (07–09): <b>0.227</b><br>Evening rush (17–19): <b>0.101</b><br>Off-peak (01–04):      <b>0.188</b></div></div>`)[0];
+                popup_875428a1226531c794d9c8f02e1f010b.setContent(html_297cdc9459f857b99828ee64db13b1db);
+            
+        
+
+        circle_marker_fc75af72062913eb5f54574d150d9edf.bindPopup(popup_875428a1226531c794d9c8f02e1f010b)
+        ;
+
+        
+    
+    
+            circle_marker_fc75af72062913eb5f54574d150d9edf.bindTooltip(
+                `<div>
+                     S27 | Vol:0.17 | Road-2 (connector N)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_a197a31654b7cbee82bcd5b01b2b8bc2 = L.marker(
+                [38.937, -77.186],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_820b044ff5517fb23db98ed6469fb4e7 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e27\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_a197a31654b7cbee82bcd5b01b2b8bc2.setIcon(div_icon_820b044ff5517fb23db98ed6469fb4e7);
+            
+    
+            var circle_marker_2ac25a4d5147c2747047fff2a11ae445 = L.circleMarker(
+                [38.921, -77.202],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff4b2", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.508095443248749, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_2a4944380c4c42ab148dec381172f3ae = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_eb41103983d05343d0443ac4b5e8fe83 = $(`<div id="html_eb41103983d05343d0443ac4b5e8fe83" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 28</b><br>Road: <b>Road-2 (connector N)</b><br>Direction class: <b>3</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.126</b><br>Morning rush (07–09): <b>0.159</b><br>Evening rush (17–19): <b>0.067</b><br>Off-peak (01–04):      <b>0.205</b></div></div>`)[0];
+                popup_2a4944380c4c42ab148dec381172f3ae.setContent(html_eb41103983d05343d0443ac4b5e8fe83);
+            
+        
+
+        circle_marker_2ac25a4d5147c2747047fff2a11ae445.bindPopup(popup_2a4944380c4c42ab148dec381172f3ae)
+        ;
+
+        
+    
+    
+            circle_marker_2ac25a4d5147c2747047fff2a11ae445.bindTooltip(
+                `<div>
+                     S28 | Vol:0.13 | Road-2 (connector N)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_b67dffed9cd47ad1eed42d4c36bf962f = L.marker(
+                [38.921, -77.202],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_47af3627ef1110e8b26fbdf2e907c575 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e28\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_b67dffed9cd47ad1eed42d4c36bf962f.setIcon(div_icon_47af3627ef1110e8b26fbdf2e907c575);
+            
+    
+            var circle_marker_db07b12ea1808b1909881ce9a6af4e2a = L.circleMarker(
+                [38.896, -77.226],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fa4a29", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.260756254196167, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_eb393d001a4b13e4a22b745157cbb351 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_b9c47a8048c9113d278b03b1d6441a93 = $(`<div id="html_b9c47a8048c9113d278b03b1d6441a93" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 29</b><br>Road: <b>Road-2 (connector N)</b><br>Direction class: <b>3</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.355</b><br>Morning rush (07–09): <b>0.471</b><br>Evening rush (17–19): <b>0.190</b><br>Off-peak (01–04):      <b>0.565</b></div></div>`)[0];
+                popup_eb393d001a4b13e4a22b745157cbb351.setContent(html_b9c47a8048c9113d278b03b1d6441a93);
+            
+        
+
+        circle_marker_db07b12ea1808b1909881ce9a6af4e2a.bindPopup(popup_eb393d001a4b13e4a22b745157cbb351)
+        ;
+
+        
+    
+    
+            circle_marker_db07b12ea1808b1909881ce9a6af4e2a.bindTooltip(
+                `<div>
+                     S29 | Vol:0.36 | Road-2 (connector N)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_432e801593f8d36a310e8970501a502a = L.marker(
+                [38.896, -77.226],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_a129b28e53aed9ee6254713df5f716bd = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e29\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_432e801593f8d36a310e8970501a502a.setIcon(div_icon_a129b28e53aed9ee6254713df5f716bd);
+            
+    
+            var circle_marker_acdac8edbef4ffddfb1da8492d6d5dd4 = L.circleMarker(
+                [38.813, -77.193],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f43e26", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.395640969276428, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_7574326019d49e79ab9b12babe877a7d = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_f0a2045982d05a1c9e6d0cc01641c3b6 = $(`<div id="html_f0a2045982d05a1c9e6d0cc01641c3b6" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 30</b><br>Road: <b>Road-3 (connector S)</b><br>Direction class: <b>3</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.366</b><br>Morning rush (07–09): <b>0.398</b><br>Evening rush (17–19): <b>0.335</b><br>Off-peak (01–04):      <b>0.193</b></div></div>`)[0];
+                popup_7574326019d49e79ab9b12babe877a7d.setContent(html_f0a2045982d05a1c9e6d0cc01641c3b6);
+            
+        
+
+        circle_marker_acdac8edbef4ffddfb1da8492d6d5dd4.bindPopup(popup_7574326019d49e79ab9b12babe877a7d)
+        ;
+
+        
+    
+    
+            circle_marker_acdac8edbef4ffddfb1da8492d6d5dd4.bindTooltip(
+                `<div>
+                     S30 | Vol:0.37 | Road-3 (connector S)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_6478630a98f7f627990d718eeddd390b = L.marker(
+                [38.813, -77.193],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_f4d2defa4cb26038061b7046f316a2a1 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e30\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_6478630a98f7f627990d718eeddd390b.setIcon(div_icon_f4d2defa4cb26038061b7046f316a2a1);
+            
+    
+            var circle_marker_8fe0b3fe1adfa83103ea073f52134f62 = L.circleMarker(
+                [38.889, -77.235],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fc4f2a", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.197863817214966, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_86a71df6239676376dbf09f00bd1fe39 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_a3f9b972b9db276e3f7a90981472e374 = $(`<div id="html_a3f9b972b9db276e3f7a90981472e374" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 31</b><br>Road: <b>Road-3 (connector S)</b><br>Direction class: <b>3</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.350</b><br>Morning rush (07–09): <b>0.373</b><br>Evening rush (17–19): <b>0.318</b><br>Off-peak (01–04):      <b>0.177</b></div></div>`)[0];
+                popup_86a71df6239676376dbf09f00bd1fe39.setContent(html_a3f9b972b9db276e3f7a90981472e374);
+            
+        
+
+        circle_marker_8fe0b3fe1adfa83103ea073f52134f62.bindPopup(popup_86a71df6239676376dbf09f00bd1fe39)
+        ;
+
+        
+    
+    
+            circle_marker_8fe0b3fe1adfa83103ea073f52134f62.bindTooltip(
+                `<div>
+                     S31 | Vol:0.35 | Road-3 (connector S)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_28341aabec21743df63fb60030c5bd69 = L.marker(
+                [38.889, -77.235],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_3b99ec4f9705a36eaf41b2ed6166b865 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e31\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_28341aabec21743df63fb60030c5bd69.setIcon(div_icon_3b99ec4f9705a36eaf41b2ed6166b865);
+            
+    
+            var circle_marker_daa4e1f48f76b9c13cb1ad81a05da1f1 = L.circleMarker(
+                [38.814, -77.196],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#fff9bd", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 7.349374026060104, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_7f564db656288ed7c7ee844c0f28db3d = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_a7f5d2f79c66875c69ca1817a8a078c8 = $(`<div id="html_a7f5d2f79c66875c69ca1817a8a078c8" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 32</b><br>Road: <b>Road-3 (connector S)</b><br>Direction class: <b>3</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.112</b><br>Morning rush (07–09): <b>0.115</b><br>Evening rush (17–19): <b>0.102</b><br>Off-peak (01–04):      <b>0.044</b></div></div>`)[0];
+                popup_7f564db656288ed7c7ee844c0f28db3d.setContent(html_a7f5d2f79c66875c69ca1817a8a078c8);
+            
+        
+
+        circle_marker_daa4e1f48f76b9c13cb1ad81a05da1f1.bindPopup(popup_7f564db656288ed7c7ee844c0f28db3d)
+        ;
+
+        
+    
+    
+            circle_marker_daa4e1f48f76b9c13cb1ad81a05da1f1.bindTooltip(
+                `<div>
+                     S32 | Vol:0.11 | Road-3 (connector S)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_8ec8d75857855908da393415020a7f1d = L.marker(
+                [38.814, -77.196],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_60926341e0505172b54c8d7b58fc9bf7 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e32\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_8ec8d75857855908da393415020a7f1d.setIcon(div_icon_60926341e0505172b54c8d7b58fc9bf7);
+            
+    
+            var circle_marker_1b80b075e912bce6c0651b80e53f1fb1 = L.circleMarker(
+                [38.847, -77.208],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#feb44e", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 8.956407845020294, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_6699f3f6da7c1502e2dec4e2873f3c1f = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_aa9d57ac98ee3cea815053aa2cef91e2 = $(`<div id="html_aa9d57ac98ee3cea815053aa2cef91e2" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 33</b><br>Road: <b>Road-3 (connector S)</b><br>Direction class: <b>3</b> | Lanes: <b>3</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.246</b><br>Morning rush (07–09): <b>0.255</b><br>Evening rush (17–19): <b>0.223</b><br>Off-peak (01–04):      <b>0.123</b></div></div>`)[0];
+                popup_6699f3f6da7c1502e2dec4e2873f3c1f.setContent(html_aa9d57ac98ee3cea815053aa2cef91e2);
+            
+        
+
+        circle_marker_1b80b075e912bce6c0651b80e53f1fb1.bindPopup(popup_6699f3f6da7c1502e2dec4e2873f3c1f)
+        ;
+
+        
+    
+    
+            circle_marker_1b80b075e912bce6c0651b80e53f1fb1.bindTooltip(
+                `<div>
+                     S33 | Vol:0.25 | Road-3 (connector S)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_1fa79d2f2b6a41d5ae32311450fa6436 = L.marker(
+                [38.847, -77.208],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_015652c3ff4cdbedf38bc9de4a3b64dc = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e33\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_1fa79d2f2b6a41d5ae32311450fa6436.setIcon(div_icon_015652c3ff4cdbedf38bc9de4a3b64dc);
+            
+    
+            var circle_marker_8d1ea9065b10dc735d181f4984e96fb3 = L.circleMarker(
+                [38.871, -77.219],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f84528", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.312610149383545, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_2e0f92b59981dcb07eef9a1ce4c9ee12 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_47577269c7d698f836705664e8421ceb = $(`<div id="html_47577269c7d698f836705664e8421ceb" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 34</b><br>Road: <b>Road-3 (connector S)</b><br>Direction class: <b>3</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.359</b><br>Morning rush (07–09): <b>0.382</b><br>Evening rush (17–19): <b>0.328</b><br>Off-peak (01–04):      <b>0.181</b></div></div>`)[0];
+                popup_2e0f92b59981dcb07eef9a1ce4c9ee12.setContent(html_47577269c7d698f836705664e8421ceb);
+            
+        
+
+        circle_marker_8d1ea9065b10dc735d181f4984e96fb3.bindPopup(popup_2e0f92b59981dcb07eef9a1ce4c9ee12)
+        ;
+
+        
+    
+    
+            circle_marker_8d1ea9065b10dc735d181f4984e96fb3.bindTooltip(
+                `<div>
+                     S34 | Vol:0.36 | Road-3 (connector S)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_cbc5dd3b45710f2a2acc314249a34bc0 = L.marker(
+                [38.871, -77.219],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_951428642e100fdff7d34ba11f06bac3 = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e34\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_cbc5dd3b45710f2a2acc314249a34bc0.setIcon(div_icon_951428642e100fdff7d34ba11f06bac3);
+            
+    
+            var circle_marker_27fff84c7f219ddbc9332a7251bfde58 = L.circleMarker(
+                [38.907, -77.215],
+                {"bubblingMouseEvents": true, "color": "#222222", "dashArray": null, "dashOffset": null, "fill": true, "fillColor": "#f94828", "fillOpacity": 0.88, "fillRule": "evenodd", "lineCap": "round", "lineJoin": "round", "opacity": 1.0, "radius": 10.275888562202454, "stroke": true, "weight": 1.2}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+        var popup_12aa208fc633515738ba325668d258a9 = L.popup({
+  "maxWidth": 230,
+});
+
+        
+            
+                var html_c09cd8973441f3f31ad1ee7a726d83ae = $(`<div id="html_c09cd8973441f3f31ad1ee7a726d83ae" style="width: 100.0%; height: 100.0%;"><div style='font-family:monospace;font-size:12px;min-width:200px'><b>Sensor 35</b><br>Road: <b>Road-2 (connector N)</b><br>Direction class: <b>3</b> | Lanes: <b>4</b><br><hr style='margin:4px 0'>Mean traffic: <b>0.356</b><br>Morning rush (07–09): <b>0.472</b><br>Evening rush (17–19): <b>0.190</b><br>Off-peak (01–04):      <b>0.571</b></div></div>`)[0];
+                popup_12aa208fc633515738ba325668d258a9.setContent(html_c09cd8973441f3f31ad1ee7a726d83ae);
+            
+        
+
+        circle_marker_27fff84c7f219ddbc9332a7251bfde58.bindPopup(popup_12aa208fc633515738ba325668d258a9)
+        ;
+
+        
+    
+    
+            circle_marker_27fff84c7f219ddbc9332a7251bfde58.bindTooltip(
+                `<div>
+                     S35 | Vol:0.36 | Road-2 (connector N)
+                 </div>`,
+                {
+  "sticky": true,
+}
+            );
+        
+    
+            var marker_709fe27979750ccd16d88865589a8579 = L.marker(
+                [38.907, -77.215],
+                {
+}
+            ).addTo(map_7a594c734321ccc4684885dbcf193a24);
+        
+    
+            var div_icon_ff5b959dd0ad1b48d3323df84b69bc5a = L.divIcon({
+  "html": "\u003cdiv style=\"font-size:7px;font-weight:bold;color:white;text-align:center;line-height:14px\"\u003e35\u003c/div\u003e",
+  "iconSize": [14, 14],
+  "iconAnchor": [7, 7],
+  "className": "empty",
+});
+        
+    
+                marker_709fe27979750ccd16d88865589a8579.setIcon(div_icon_ff5b959dd0ad1b48d3323df84b69bc5a);
+            
+</script>
+</html>
