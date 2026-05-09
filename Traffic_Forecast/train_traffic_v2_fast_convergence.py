@@ -8,6 +8,7 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
 from scipy.io import loadmat
+from sklearn.mixture import GaussianMixture
 
 
 # -------------------------
@@ -19,7 +20,7 @@ def parse_args():
     parser.add_argument("--mat-file", default="traffic_dataset.mat")
     parser.add_argument("--dataset-file", default="dataset.npz")
     parser.add_argument("--model-file", default="model_v2.pth")
-    parser.add_argument("--epochs", type=int, default=300)
+    parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--weight-decay", type=float, default=0.001)
@@ -106,7 +107,6 @@ class AdaptiveGraphConv(nn.Module):
         return self.norm(torch.relu(self.linear(z_agg)))
 
 
-
 class GRU_GCN_v2(nn.Module):
     """
     Enhancements over GRU_GCN (v1):
@@ -122,13 +122,13 @@ class GRU_GCN_v2(nn.Module):
                           num_layers=1, batch_first=True)
 
         self.static_mlp = nn.Sequential(
-            nn.Linear(static_size, 32),
+            nn.Linear(static_size, 64), # Todo: Bucket: 32
             nn.ReLU(),
             nn.Dropout(dropout),
         )
 
         self.combine = nn.Sequential(
-            nn.Linear(hidden_size + 32, hidden_size),
+            nn.Linear(hidden_size + 64, hidden_size),   # Todo: Bucket: 32
             nn.ReLU(),
         )
 
@@ -189,7 +189,6 @@ def evaluate(model, loader, device, loss_fn, adj, y_mean, y_std):
             pred  = model(x, adj)
             total_loss += float(loss_fn(pred, y).item()) * len(y)
             pred_real = pred * y_std_t + y_mean_t
-            pred_real = pred_real.clamp(0.0, 1.0)   # Todo: Maybe remove. Output needs to be between 0 and 1.
             y_real    = y   * y_std_t + y_mean_t
             total_sq  += float(torch.sum((pred_real - y_real) ** 2).item())
             total_abs += float(torch.sum(torch.abs(pred_real - y_real)).item())
@@ -233,6 +232,41 @@ def dataset_exists(data_dir=".", mat_file="traffic_dataset.mat", npz_file="datas
 
 
 
+def add_gmm_mode_features(X, gmm=None, n_components=5):
+    """
+    Adds GMM mode-probability features for historical traffic columns 0-9.
+
+    For each traffic value, this adds n_components soft probabilities.
+    With 10 traffic columns and 5 modes: +50 features.
+    """
+
+    traffic = X[:, :, :10]  # [samples, sensors, 10]
+    original_shape = traffic.shape
+
+    flat = traffic.reshape(-1, 1)
+
+    if gmm is None:
+        gmm = GaussianMixture(
+            n_components=n_components,
+            covariance_type="full",
+            random_state=10
+        )
+        gmm.fit(flat)
+
+    probs = gmm.predict_proba(flat)  # [samples*sensors*10, n_components]
+
+    probs = probs.reshape(
+        original_shape[0],
+        original_shape[1],
+        original_shape[2] * n_components
+    )
+
+    X_new = np.concatenate([X, probs.astype(np.float32)], axis=-1)
+
+    return X_new, gmm
+
+
+
 def train(args):
     set_seed(args.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -264,6 +298,12 @@ def train(args):
     X_tr, Y_tr = X_train[train_idx], Y_train[train_idx]
     X_val, Y_val = (X_train[val_idx], Y_train[val_idx]) if val_idx is not None else (None, None)
 
+    X_tr, gmm = add_gmm_mode_features(X_tr, gmm=None, n_components=5)   # Todo: GMM
+    if X_val is not None:
+        X_val, _ = add_gmm_mode_features(X_val, gmm=gmm, n_components=5)
+    X_test, _ = add_gmm_mode_features(X_test, gmm=gmm, n_components=5)
+    print("X_tr shape after GMM features:", X_tr.shape)
+
     # For normalization, only from training split
     continuous_idx = list(range(10)) + [39]
     x_mean = X_tr[:, :, continuous_idx].mean(axis=(0, 1))
@@ -288,7 +328,7 @@ def train(args):
 
     model = GRU_GCN_v2(
         hidden_size=args.hidden_size,
-        static_size=X_train.shape[-1] - 10,
+        static_size=X_tr.shape[-1] - 10,
         dropout=args.dropout,
         n_sensors=adj_mat.shape[0],
         adj_mask=adj_mask,
