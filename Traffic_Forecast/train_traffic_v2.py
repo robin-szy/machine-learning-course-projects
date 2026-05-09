@@ -88,7 +88,7 @@ class AdaptiveGraphConv(nn.Module):
     """
     def __init__(self, in_size, out_size, n_sensors, adj_mask):
         super().__init__()
-        self.register_buffer("adj_mask", adj_mask.float())
+        self.register_buffer("adj_mask", adj_mask.float())  # Register buffer that should not be considered as a model parameter (optimizer does not train it)
         # Initialise logits at 0 so sigmoid(0)=0.5 — neither suppressed nor amplified
         self.edge_logits = nn.Parameter(torch.zeros(n_sensors, n_sensors))
         self.linear = nn.Linear(in_size, out_size)
@@ -193,12 +193,23 @@ def evaluate(model, loader, device, loss_fn, adj, y_mean, y_std):
             total_abs += float(torch.sum(torch.abs(pred_real - y_real)).item())
             total     += y_real.numel()
 
+    avg_loss = total_loss / max(len(loader.dataset), 1)
+    rmse = np.sqrt(total_sq / max(total, 1))
+    mae = total_abs / max(total, 1)
+
+    return avg_loss, rmse, mae
+
     return (total_loss / max(len(loader.dataset), 1),
             np.sqrt(total_sq / max(total, 1)),
             total_abs / max(total, 1))
 
 
 def dataset_exists(data_dir=".", mat_file="traffic_dataset.mat", npz_file="dataset.npz"):
+    """
+    It basically just does what the main-chekcpoint.ipynb does. If the npz-dataset does
+    not exist, yet, then it looks for the mat-file and converts it to the npz-file.
+    """
+
     mat_path = os.path.join(data_dir, mat_file)
     npz_path = os.path.join(data_dir, npz_file)
     if os.path.exists(npz_path):
@@ -243,9 +254,15 @@ def train(args):
         split = int((1.0 - args.val_frac) * n)
         train_idx, val_idx = indices[:split], indices[split:]
 
+        if len(train_idx) == 0 or len(val_idx) == 0:
+            raise ValueError("Train/validation split failed. Check data size and --val-frac.")
+
+
     X_tr, Y_tr = X_train[train_idx], Y_train[train_idx]
     X_val, Y_val = (X_train[val_idx], Y_train[val_idx]) if val_idx is not None else (None, None)
 
+    # For normalization, only from training split
+    # Todo: Find out which columns are continuous
     continuous_idx = list(range(10)) + [39]
     x_mean = X_tr[:, :, continuous_idx].mean(axis=(0, 1))
     x_std  = X_tr[:, :, continuous_idx].std(axis=(0, 1))  + 1e-6
@@ -287,10 +304,18 @@ def train(args):
     else:
         loss_fn = nn.SmoothL1Loss()
 
-    optimizer = (torch.optim.Adam(model.parameters(), lr=args.lr)
-                 if args.weight_decay == 0.0
-                 else torch.optim.AdamW(model.parameters(), lr=args.lr,
-                                        weight_decay=args.weight_decay))
+    # Optimizer
+    if args.weight_decay == 0.0:
+        optimizer = torch.optim.Adam(
+            model.parameters(),
+            lr=args.lr
+        )
+    else:
+        optimizer = torch.optim.AdamW(
+            model.parameters(),
+            lr=args.lr,
+            weight_decay=args.weight_decay
+        )
 
     best_rmse, best_mae, best_state = float("inf"), None, None
     epochs_no_improve = 0

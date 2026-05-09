@@ -11,6 +11,7 @@ from torch.nn.utils.rnn import pack_padded_sequence
 from scipy.io import loadmat
 
 
+
 # -------------------------
 # Arguments for parsing
 # (Mostly used for testing on HPC)
@@ -79,6 +80,7 @@ class TrafficDataset(Dataset):
 # -----------------
 # Model
 # -----------------
+
 class GRU_GCN(nn.Module):
     # The input sizes so I don't have to adapt the size every time when I add/remove a feature
     def __init__(self, hidden_size=64, static_size=38, dropout=0.1):
@@ -146,7 +148,6 @@ class GRU_GCN(nn.Module):
         z = torch.einsum("ij,bjf->bif", adj, z)
         z = self.graph_layer(z)
         # Todo: Replace graph e.g. by a convolutional graph with more layers? Currently, we only look at direct neighbors. With more layers, we can consider neighbors of neighbors.
-
 
         pred = self.head(z).squeeze(-1)  # [B, 36]
         return pred
