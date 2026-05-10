@@ -31,7 +31,7 @@ def parse_args():
     parser.add_argument("--patience", type=int, default=30)
     parser.add_argument("--min-delta", type=float, default=1e-4)
     parser.add_argument("--dropout", type=float, default=0.1)
-    parser.add_argument("--seed", type=int, default=523)
+    parser.add_argument("--seed", type=int, default=99)    # 523
     parser.add_argument("--val-frac", type=float, default=0.2)
     parser.add_argument("--loss", type=str, default="huber",
                         choices=["huber", "mse", "smoothl1", "mae"])
@@ -115,6 +115,32 @@ class Chomp1d(nn.Module):
         return x[:, :, :-self.chomp_size].contiguous()
 
 
+class TemporalBlock(nn.Module):
+    def __init__(self, in_ch, out_ch, kernel_size, dilation, dropout):
+        super().__init__()
+        padding = (kernel_size - 1) * dilation
+
+        self.net = nn.Sequential(
+            nn.Conv1d(in_ch, out_ch, kernel_size,
+                      padding=padding, dilation=dilation),
+            Chomp1d(padding),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+
+            nn.Conv1d(out_ch, out_ch, kernel_size,
+                      padding=padding, dilation=dilation),
+            Chomp1d(padding),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+        )
+
+        self.downsample = nn.Conv1d(in_ch, out_ch, 1) if in_ch != out_ch else nn.Identity()
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        return self.relu(self.net(x) + self.downsample(x))
+
+
 class Conv1D_GCN(nn.Module):
     """
     Enhancements over GRU_GCN (v1):
@@ -126,22 +152,18 @@ class Conv1D_GCN(nn.Module):
                  n_sensors=36, adj_mask=None):
         super().__init__()
 
-        embedding_size = 8
+        self.gru = nn.GRU(input_size=1, hidden_size=hidden_size,
+                          num_layers=1, batch_first=True)
 
-        # Without sensor embedding, two sensors are assumed to be the similar if all
-        # features like recent traffic history, road, lanes, direction, graph neighbors
-        # are similar. But two sensors could still be different, even if these features look
-        # similar. E.g. sensor A could be highway merge bottleneck and sensor B at suburban straight road
-        # Embedding helps the model to learn: This sensor usually behaves like this.
-        self.sensor_emb = nn.Embedding(n_sensors, embedding_size)
-
-        self.temporal_conv = nn.Sequential(
-            nn.Conv1d(1, hidden_size, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=2, dilation=2),
-            nn.ReLU(),
+        self.tcn = nn.Sequential(
+            TemporalBlock(1, hidden_size, kernel_size=3, dilation=1,
+                          dropout=dropout),
+            TemporalBlock(hidden_size, hidden_size, kernel_size=3, dilation=2,
+                          dropout=dropout),
+            TemporalBlock(hidden_size, hidden_size, kernel_size=3, dilation=4,
+                          dropout=dropout),
         )
+        self.temporal_norm = nn.LayerNorm(hidden_size)
 
         self.static_mlp = nn.Sequential(
             nn.Linear(static_size, 32),
@@ -150,7 +172,7 @@ class Conv1D_GCN(nn.Module):
         )
 
         self.combine = nn.Sequential(
-            nn.Linear(hidden_size + 32 + embedding_size, hidden_size),
+            nn.Linear(hidden_size + 32, hidden_size),
             nn.ReLU(),
         )
 
@@ -173,17 +195,14 @@ class Conv1D_GCN(nn.Module):
         B, N, T = seq.shape
 
         seq_flat = seq.reshape(B * N, 1, T)  # [B*N, 1, 10]
-        h = self.temporal_conv(seq_flat)  # [B*N, hidden_size, 10]
-        h = h.mean(dim=-1)  # [B*N, hidden_size]
-        h = h.reshape(B, N, -1)  # [B, N, hidden_size]
+        h = self.tcn(seq_flat)  # [B*N, hidden_size, 10]
+        h = h[:, :, -1]  # last time step
+        #h = h.mean(dim=-1)  # [B*N, hidden_size]
+        h = self.temporal_norm(h)
+        h = h.reshape(B, N, -1)
 
         s = self.static_mlp(static)
-
-        sensor_ids = torch.arange(N, device=x.device)
-        e = self.sensor_emb(sensor_ids)  # [N, 8]
-        e = e.unsqueeze(0).expand(B, -1, -1)  # [B, N, 8]
-
-        z = self.combine(torch.cat([h, s, e], dim=-1))
+        z = self.combine(torch.cat([h, s], dim=-1))   # [B, N, hidden]
 
         z1 = self.gcn1(z)
         z2 = self.gcn2(z1)
@@ -394,7 +413,7 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version":    "conv1d_gcn_v2",
+        "model_version":    "conv1d_gcn_tcn",
         "hidden_size":      args.hidden_size,
         "dropout":          args.dropout,
         "n_sensors":        adj_mat.shape[0],
@@ -413,7 +432,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "conv1d_gcn_v2",
+        "model_version": "tcn_gcn_v1",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,

@@ -118,6 +118,14 @@ class GRU_GCN_v2(nn.Module):
                  n_sensors=36, adj_mask=None):
         super().__init__()
 
+        # Without sensor embedding, two sensors are assumed to be the similar if all
+        # features like recent traffic history, road, lanes, direction, graph neighbors
+        # are similar. But two sensors could still be different, even if these features look
+        # similar. E.g. sensor A could be highway merge bottleneck and sensor B at suburban straight road
+        # Embedding helps the model to learn: This sensor usually behaves like this.
+        embedding_size = 8
+        self.sensor_emb = nn.Embedding(n_sensors, embedding_size)
+
         self.gru = nn.GRU(input_size=1, hidden_size=hidden_size,
                           num_layers=1, batch_first=True)
 
@@ -128,7 +136,7 @@ class GRU_GCN_v2(nn.Module):
         )
 
         self.combine = nn.Sequential(
-            nn.Linear(hidden_size + 32, hidden_size),
+            nn.Linear(hidden_size + 32 + embedding_size, hidden_size),
             nn.ReLU(),
         )
 
@@ -155,7 +163,12 @@ class GRU_GCN_v2(nn.Module):
         h = h[-1].reshape(B, N, -1)
 
         s = self.static_mlp(static)
-        z = self.combine(torch.cat([h, s], dim=-1))   # [B, N, hidden]
+
+        sensor_ids = torch.arange(N, device=x.device)
+        e = self.sensor_emb(sensor_ids)  # [N, 8]
+        e = e.unsqueeze(0).expand(B, -1, -1)  # [B, N, 8]
+
+        z = self.combine(torch.cat([h, s, e], dim=-1))
 
         z1 = self.gcn1(z)
         z2 = self.gcn2(z1)
@@ -369,7 +382,7 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version":    "v2",
+        "model_version":    "gru_gcn_v2",
         "hidden_size":      args.hidden_size,
         "dropout":          args.dropout,
         "n_sensors":        adj_mat.shape[0],
@@ -388,7 +401,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "v2",
+        "model_version": "gru_gcn_v2",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,
