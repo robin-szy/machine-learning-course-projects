@@ -21,5 +21,15 @@ are similar. But two sensors could still be different, even if these features lo
 similar. E.g. sensor A could be highway merge bottleneck and sensor B at suburban straight road
 Embedding helps the model to learn: This sensor usually behaves like this.
 
-Results 1D-CNN:
-* RMSE seed 523: With emb.: 0.0328, w/o emb.: 0.0333
+Experiment over 10 seeds:
+* Embedding always improves the model, for both versions (GRU-GCN and 1D CNN-GCN)
+* 1D CNN-GCN usually is better than GRU-GCN with current configs. But we haven't fine-tuned the hyperparams yet.
+
+
+### Attention
+
+Using attention on CNN by a Conv1D layer with kernel size 1 did not improve RMSE. It made it a bit more interpretable, though, since we can clearly see below that the last 3 time steps matter most. This was probably already learned by previous Conv1D layer, and the attention just makes it more interpretable.
+
+Average temporal attention weights over 10 timesteps:
+[0.08451255 0.08451863 0.07820263 0.08952256 0.08872515 0.08806809
+ 0.08933216 0.10906468 0.14368138 0.14437218]

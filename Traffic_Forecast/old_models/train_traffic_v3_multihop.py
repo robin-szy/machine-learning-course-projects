@@ -73,37 +73,38 @@ class TrafficDataset(Dataset):
             y = (y - self.y_mean) / self.y_std
         return torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
-
-class AdaptiveGraphConv(nn.Module):
-    """
-    Graph convolution with learnable edge weights.
-
-    The topology (which edges exist) is fixed from the adj_mask provided at
-    construction, matching the SADL-I insight: we know the connectivity from
-    the road network, but let the model learn the *strength* of each edge.
-
-    Two improvements over the V1 fixed graph layer:
-      1. Each edge weight is a free parameter, optimised end-to-end.
-      2. A residual connection lets signal bypass the aggregation.
-    """
-    def __init__(self, in_size, out_size, n_sensors, adj_mask):
+class MultiHopAdaptiveGraph(nn.Module):
+    def __init__(self, hidden_size, n_sensors, adj_mask, num_hops=3, dropout=0.1):
         super().__init__()
-        self.register_buffer("adj_mask", adj_mask.float())  # Register buffer that should not be considered as a model parameter (optimizer does not train it)
-        # Initialise logits at 0 so sigmoid(0)=0.5 — neither suppressed nor amplified
+        self.register_buffer("adj_mask", adj_mask.float())
         self.edge_logits = nn.Parameter(torch.zeros(n_sensors, n_sensors))
-        self.linear = nn.Linear(in_size, out_size)
-        self.norm = nn.LayerNorm(out_size)
+        self.num_hops = num_hops
+
+        self.proj = nn.Sequential(
+            nn.Linear(hidden_size * (num_hops + 1), hidden_size),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.LayerNorm(hidden_size),
+        )
 
     def get_adj(self):
         w = torch.sigmoid(self.edge_logits) * self.adj_mask
-        w = w + torch.eye(w.shape[0], device=w.device)   # self-loop
+        w = w + torch.eye(w.shape[0], device=w.device)
         deg = w.sum(dim=1, keepdim=True).clamp(min=1e-6)
         return w / deg
 
     def forward(self, z):
         adj = self.get_adj()
-        z_agg = torch.einsum("ij,bjf->bif", adj, z)
-        return self.norm(torch.relu(self.linear(z_agg)))
+
+        hops = [z]          # 0-hop: own sensor
+        z_hop = z
+
+        for _ in range(self.num_hops):
+            z_hop = torch.einsum("ij,bjf->bif", adj, z_hop)
+            hops.append(z_hop)
+
+        z_multi = torch.cat(hops, dim=-1)
+        return self.proj(z_multi)
 
 
 class Chomp1d(nn.Module):
@@ -157,8 +158,13 @@ class Conv1D_GCN(nn.Module):
         if adj_mask is None:
             adj_mask = torch.ones(n_sensors, n_sensors)
 
-        self.gcn1 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
-        self.gcn2 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
+        self.multi_hop = MultiHopAdaptiveGraph(
+            hidden_size=hidden_size,
+            n_sensors=n_sensors,
+            adj_mask=adj_mask,
+            num_hops=3,
+            dropout=dropout,
+        )
 
         self.head = nn.Sequential(
             nn.Linear(hidden_size, 32),
@@ -185,14 +191,13 @@ class Conv1D_GCN(nn.Module):
 
         z = self.combine(torch.cat([h, s, e], dim=-1))
 
-        z1 = self.gcn1(z)
-        z2 = self.gcn2(z1)
-        z_out = z2 + z    # residual skip
+        z_graph = self.multi_hop(z)
+        z_out = z_graph + z
 
         return self.head(z_out).squeeze(-1)
 
     def get_learned_adj(self):
-        return self.gcn1.get_adj().detach().cpu().numpy()
+        return self.multi_hop.get_adj().detach().cpu().numpy()
 
 
 # -------------------------
@@ -394,7 +399,7 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version":    "conv1d_gcn_v2",
+        "model_version":    "conv1d_gcn_multihop",
         "hidden_size":      args.hidden_size,
         "dropout":          args.dropout,
         "n_sensors":        adj_mat.shape[0],
@@ -413,7 +418,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "conv1d_gcn_v2",
+        "model_version": "conv1d_gcn_multihop",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,
