@@ -1,3 +1,7 @@
+"""
+In comparison to v2, this version uses Conv1D instead of GRU
+"""
+
 
 import os
 import random
@@ -70,10 +74,6 @@ class TrafficDataset(Dataset):
         return torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
 
-# -------------------------
-# Enhanced model (V2)
-# -------------------------
-
 class AdaptiveGraphConv(nn.Module):
     """
     Graph convolution with learnable edge weights.
@@ -107,7 +107,7 @@ class AdaptiveGraphConv(nn.Module):
 
 
 
-class GRU_GCN_v2(nn.Module):
+class TCN_GCN(nn.Module):
     """
     Enhancements over GRU_GCN (v1):
       1. Learnable adjacency matrix (SADL-inspired edge strength learning)
@@ -120,6 +120,18 @@ class GRU_GCN_v2(nn.Module):
 
         self.gru = nn.GRU(input_size=1, hidden_size=hidden_size,
                           num_layers=1, batch_first=True)
+
+        self.temporal_conv = nn.Sequential(
+            nn.Conv1d(1, hidden_size, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            #nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=1),
+            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=2,
+                      dilation=2),  # Todo: Change back
+            nn.ReLU(),
+        )
+        self.temporal_skip = nn.Linear(10, hidden_size)
+        self.temporal_norm = nn.LayerNorm(hidden_size)
 
         self.static_mlp = nn.Sequential(
             nn.Linear(static_size, 32),
@@ -145,14 +157,22 @@ class GRU_GCN_v2(nn.Module):
             nn.Linear(32, 1),
         )
 
-    def forward(self, x, adj=None):   # adj param kept for API compatibility
+    def forward(self, x):   # adj param kept for API compatibility
         seq    = x[:, :, :10]
         static = x[:, :, 10:]
         B, N, T = seq.shape
 
-        seq_flat = seq.reshape(B * N, T, 1)
-        _, h = self.gru(seq_flat)
-        h = h[-1].reshape(B, N, -1)
+        #seq_flat = seq.reshape(B * N, T, 1)
+        #_, h = self.gru(seq_flat)
+        #h = h[-1].reshape(B, N, -1)
+        seq_flat = seq.reshape(B * N, 1, T)  # [B*N, 1, 10]
+        h = self.temporal_conv(seq_flat)  # [B*N, hidden_size, 10]
+        #h = h[:, :, -1]  # [B*N, hidden_size]
+        h = h.mean(dim=-1)  # [B*N, hidden_size]
+        #skip = self.temporal_skip(seq.reshape(B * N, T))  # [B*N, hidden_size]
+        #h = h + skip
+        #h = self.temporal_norm(h)
+        h = h.reshape(B, N, -1)  # [B, N, hidden_size]
 
         s = self.static_mlp(static)
         z = self.combine(torch.cat([h, s], dim=-1))   # [B, N, hidden]
@@ -186,7 +206,7 @@ def evaluate(model, loader, device, loss_fn, adj, y_mean, y_std):
     with torch.no_grad():
         for x, y in loader:
             x, y = x.to(device), y.to(device)
-            pred  = model(x, adj)
+            pred  = model(x)
             total_loss += float(loss_fn(pred, y).item()) * len(y)
             pred_real = pred * y_std_t + y_mean_t
             pred_real = pred_real.clamp(0.0, 1.0)   # Todo: Maybe remove. Output needs to be between 0 and 1.
@@ -286,7 +306,7 @@ def train(args):
     adj_norm = normalize_adj(adj_mat)
     adj_t    = torch.tensor(adj_norm, dtype=torch.float32).to(device)
 
-    model = GRU_GCN_v2(
+    model = TCN_GCN(
         hidden_size=args.hidden_size,
         static_size=X_train.shape[-1] - 10,
         dropout=args.dropout,
@@ -328,7 +348,7 @@ def train(args):
         for x, y in train_loader:
             x, y = x.to(device), y.to(device)
             optimizer.zero_grad()
-            pred = model(x, adj_t)
+            pred = model(x)
             loss = loss_fn(pred, y)
             loss.backward()
             optimizer.step()
