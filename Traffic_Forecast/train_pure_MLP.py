@@ -115,7 +115,7 @@ class Chomp1d(nn.Module):
         return x[:, :, :-self.chomp_size].contiguous()
 
 
-class Conv1D_GCN(nn.Module):
+class GCN_Conv1D(nn.Module):
     """
     Enhancements over GRU_GCN (v1):
       1. Learnable adjacency matrix (SADL-inspired edge strength learning)
@@ -150,7 +150,7 @@ class Conv1D_GCN(nn.Module):
         )
 
         self.combine = nn.Sequential(
-            nn.Linear(hidden_size + 32 + embedding_size, hidden_size),
+            nn.Linear(10 + 32 + embedding_size, hidden_size),
             nn.ReLU(),
         )
 
@@ -159,6 +159,14 @@ class Conv1D_GCN(nn.Module):
 
         self.gcn1 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
         self.gcn2 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
+
+        self.post_gcn_mlp = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+        )
 
         self.head = nn.Sequential(
             nn.Linear(hidden_size, 32),
@@ -172,24 +180,21 @@ class Conv1D_GCN(nn.Module):
         static = x[:, :, 10:]
         B, N, T = seq.shape
 
-        seq_flat = seq.reshape(B * N, 1, T)  # [B*N, 1, 10]
-        h = self.temporal_conv(seq_flat)  # [B*N, hidden_size, 10]
-        h = h.mean(dim=-1)  # [B*N, hidden_size]
-        h = h.reshape(B, N, -1)  # [B, N, hidden_size]
-
         s = self.static_mlp(static)
 
         sensor_ids = torch.arange(N, device=x.device)
         e = self.sensor_emb(sensor_ids)  # [N, 8]
         e = e.unsqueeze(0).expand(B, -1, -1)  # [B, N, 8]
 
-        z = self.combine(torch.cat([h, s, e], dim=-1))
+        z = self.combine(torch.cat([seq, s, e], dim=-1))
 
-        z1 = self.gcn1(z)
-        z2 = self.gcn2(z1)
-        z_out = z2 + z    # residual skip
+        #z1 = self.gcn1(z)
+        #z2 = self.gcn2(z1)
+        #z_out = z2 + z    # residual skip
 
-        return self.head(z_out).squeeze(-1)
+        h = self.post_gcn_mlp(z)
+
+        return self.head(h + z).squeeze(-1)
 
     def get_learned_adj(self):
         return self.gcn1.get_adj().detach().cpu().numpy()
@@ -257,30 +262,6 @@ def dataset_exists(data_dir=".", mat_file="traffic_dataset.mat", npz_file="datas
     return npz_path
 
 
-def get_baseline(loader, device, y_mean, y_std):
-    # Just to compare against a baseline
-    total_sq = total_abs = total = 0.0
-
-    y_mean_t = torch.tensor(y_mean, dtype=torch.float32, device=device)
-    y_std_t  = torch.tensor(y_std,  dtype=torch.float32, device=device)
-
-    with torch.no_grad():
-        for x, y in loader:
-            x, y = x.to(device), y.to(device)
-
-            pred = x[:, :, 9]   # last observed traffic value, already normalized
-
-            pred_real = pred * y_std_t + y_mean_t
-            y_real    = y    * y_std_t + y_mean_t
-
-            total_sq  += torch.sum((pred_real - y_real) ** 2).item()
-            total_abs += torch.sum(torch.abs(pred_real - y_real)).item()
-            total     += y_real.numel()
-
-    rmse = np.sqrt(total_sq / total)
-    mae = total_abs / total
-    return rmse, mae
-
 
 def train(args):
     set_seed(args.seed)
@@ -328,9 +309,6 @@ def train(args):
         val_ds = TrafficDataset(X_val, Y_val, continuous_idx, x_mean, x_std, y_mean, y_std)
         val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False)
 
-    p_rmse, p_mae = get_baseline(val_loader, device, y_mean, y_std)
-    print(f"Persistence baseline: val_rmse={p_rmse:.4f}  val_mae={p_mae:.4f}")
-
     # Build adj_mask (binary topology) for the learnable GCN
     adj_mask = torch.tensor((adj_mat > 0.5).astype(np.float32))
 
@@ -338,7 +316,7 @@ def train(args):
     adj_norm = normalize_adj(adj_mat)
     adj_t    = torch.tensor(adj_norm, dtype=torch.float32).to(device)
 
-    model = Conv1D_GCN(
+    model = GCN_Conv1D(
         hidden_size=args.hidden_size,
         static_size=X_train.shape[-1] - 10,
         dropout=args.dropout,
@@ -421,7 +399,7 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version":    "conv1d_gcn",
+        "model_version":    "pure_mlp",
         "hidden_size":      args.hidden_size,
         "dropout":          args.dropout,
         "n_sensors":        adj_mat.shape[0],
@@ -440,7 +418,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "conv1d_gcn",
+        "model_version": "pure_mlp",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,

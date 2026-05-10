@@ -193,10 +193,6 @@ class GCN_Conv1D(nn.Module):
         z_out = z2 + z    # residual skip
 
         h = self.post_gcn_mlp(z_out)
-        #seq_flat = z_out[:, :, :10].reshape(B * N, 1, T)  # [B*N, 1, 10]
-        #h = self.temporal_conv(seq_flat)  # [B*N, hidden_size, 10]
-        #h = h.mean(dim=-1)  # [B*N, hidden_size]
-        #h = h.reshape(B, N, -1)  # [B, N, hidden_size]
 
         return self.head(h + z_out).squeeze(-1)
 
