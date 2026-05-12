@@ -28,10 +28,10 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--weight-decay", type=float, default=0.001)
-    parser.add_argument("--hidden-size", type=int, default=160)
+    parser.add_argument("--hidden-size", type=int, default=32)
     parser.add_argument("--patience", type=int, default=30)
     parser.add_argument("--min-delta", type=float, default=1e-4)
-    parser.add_argument("--dropout", type=float, default=0.15)
+    parser.add_argument("--dropout", type=float, default=0.1)
     parser.add_argument("--seed", type=int, default=523)
     parser.add_argument("--val-frac", type=float, default=0.2)
     parser.add_argument("--loss", type=str, default="huber",
@@ -412,10 +412,6 @@ def train(args):
             val_loss, val_rmse, val_mae = evaluate(
                 model, val_loader, device, loss_fn, adj_t, y_mean, y_std)
 
-            train_eval_loss, train_rmse, train_mae = evaluate(  # Todo: Maybe remove. Calculates training RMSE.
-                model, train_loader, device, loss_fn, adj_t, y_mean, y_std
-            )
-
             if val_rmse < best_rmse - args.min_delta:
                 best_rmse = val_rmse
                 best_mae  = val_mae
@@ -427,7 +423,6 @@ def train(args):
 
             print(f"epoch {epoch+1:03d} : train_loss={train_loss:.4f}  "
                   f"val_loss={val_loss:.4f}  "
-                  f"train_rmse={train_rmse:.4f}  "
                   f"val_rmse={val_rmse:.4f}  val_mae={val_mae:.4f}  "
                   f"best={best_rmse:.4f}")
 

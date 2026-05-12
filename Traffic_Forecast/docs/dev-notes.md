@@ -26,6 +26,9 @@ Experiment over 10 seeds:
 * 1D CNN-GCN usually is better than GRU-GCN with current configs. But we haven't fine-tuned the hyperparams yet.
 
 
+Embedding the sensors together with the hours did not really improve anything. Only tested on one seed, though:
+Original: train=0.0180 val_rmse=0.0328 val_mae=0.0212 best=0.0328 Embedding hour with sensor: epoch 193 : train=0.0171 val_rmse=0.0327 val_mae=0.0208 best=0.0327
+
 ### Attention
 
 Using attention on CNN by a Conv1D layer with kernel size 1 did not improve RMSE. It made it a bit more interpretable, though, since we can clearly see below that the last 3 time steps matter most. This was probably already learned by previous Conv1D layer, and the attention just makes it more interpretable.
@@ -33,3 +36,15 @@ Using attention on CNN by a Conv1D layer with kernel size 1 did not improve RMSE
 Average temporal attention weights over 10 timesteps:
 [0.08451255 0.08451863 0.07820263 0.08952256 0.08872515 0.08806809
  0.08933216 0.10906468 0.14368138 0.14437218]
+
+
+### Stratification
+
+Stratification by traffic volume does not seem to improve overall RMSE.
+
+          best_rmse  best_mae
+no_strat   0.033843  0.021994  
+q3         0.034507  0.022110  
+q4         0.034115  0.021848
+
+We'll stick with the old approach for the validation set.
