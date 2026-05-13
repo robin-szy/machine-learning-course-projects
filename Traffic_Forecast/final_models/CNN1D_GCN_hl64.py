@@ -28,10 +28,10 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--weight-decay", type=float, default=0.001)
-    parser.add_argument("--hidden-size", type=int, default=32)
+    parser.add_argument("--hidden-size", type=int, default=64)
     parser.add_argument("--patience", type=int, default=30)
     parser.add_argument("--min-delta", type=float, default=1e-4)
-    parser.add_argument("--dropout", type=float, default=0.1)
+    parser.add_argument("--dropout", type=float, default=0.15)
     parser.add_argument("--seed", type=int, default=523)
     parser.add_argument("--val-frac", type=float, default=0.2)
     parser.add_argument("--loss", type=str, default="huber",
@@ -390,7 +390,9 @@ def train(args):
             weight_decay=args.weight_decay
         )
 
-    best_rmse, best_mae, best_state = float("inf"), None, None
+    best_rmse, best_mae = float("inf"), None
+    best_train_rmse, best_train_mae = None, None
+    best_state = None
     epochs_no_improve = 0
 
     for epoch in range(args.epochs):
@@ -412,9 +414,15 @@ def train(args):
             val_loss, val_rmse, val_mae = evaluate(
                 model, val_loader, device, loss_fn, adj_t, y_mean, y_std)
 
+            train_eval_loss, train_rmse, train_mae = evaluate(  # Todo: Maybe remove. Calculates training RMSE.
+                model, train_loader, device, loss_fn, adj_t, y_mean, y_std
+            )
+
             if val_rmse < best_rmse - args.min_delta:
                 best_rmse = val_rmse
                 best_mae  = val_mae
+                best_train_rmse = train_rmse
+                best_train_mae = train_mae
                 best_state = {k: v.detach().cpu().clone()
                               for k, v in model.state_dict().items()}
                 epochs_no_improve = 0
@@ -423,6 +431,7 @@ def train(args):
 
             print(f"epoch {epoch+1:03d} : train_loss={train_loss:.4f}  "
                   f"val_loss={val_loss:.4f}  "
+                  f"train_rmse={train_rmse:.4f}  "
                   f"val_rmse={val_rmse:.4f}  val_mae={val_mae:.4f}  "
                   f"best={best_rmse:.4f}")
 
@@ -460,7 +469,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "conv1d_gcn",
+        "model_version": "pure_mlp",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,
@@ -471,7 +480,9 @@ def train(args):
         "huber_delta": args.huber_delta,
         "stratify": args.stratify,
         "total_params": total_params,
-        "best_mae":  best_mae  if not args.final_train else None,
+        "best_train_mae": best_train_mae if not args.final_train else None,
+        "best_train_rmse": best_train_rmse if not args.final_train else None,
+        "best_mae": best_mae if not args.final_train else None,
         "best_rmse": best_rmse if not args.final_train else None,
     }
     df = pd.DataFrame([row])

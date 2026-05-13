@@ -1,3 +1,7 @@
+"""
+In comparison to v2, this version uses Conv1D instead of GRU
+"""
+
 
 import os
 import random
@@ -19,7 +23,7 @@ def parse_args():
     parser.add_argument("--data-dir", default="data")
     parser.add_argument("--mat-file", default="traffic_dataset.mat")
     parser.add_argument("--dataset-file", default="dataset.npz")
-    parser.add_argument("--model-file", default="model_v2.pth")
+    parser.add_argument("--model-file", default="model_v3.pth")
     parser.add_argument("--epochs", type=int, default=300)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=0.001)
@@ -27,7 +31,7 @@ def parse_args():
     parser.add_argument("--hidden-size", type=int, default=32)
     parser.add_argument("--patience", type=int, default=30)
     parser.add_argument("--min-delta", type=float, default=1e-4)
-    parser.add_argument("--dropout", type=float, default=0.1)
+    parser.add_argument("--dropout", type=float, default=0.15)
     parser.add_argument("--seed", type=int, default=523)
     parser.add_argument("--val-frac", type=float, default=0.2)
     parser.add_argument("--loss", type=str, default="huber",
@@ -73,44 +77,63 @@ class TrafficDataset(Dataset):
         return torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
 
-# -------------------------
-# Enhanced model (V2)
-# -------------------------
-
-class AdaptiveGraphConv(nn.Module):
+class GraphAttentionConv(nn.Module):
     """
-    Graph convolution with learnable edge weights.
+    Dynamic graph attention over the fixed road topology.
 
-    The topology (which edges exist) is fixed from the adj_mask provided at
-    construction, matching the SADL-I insight: we know the connectivity from
-    the road network, but let the model learn the *strength* of each edge.
-
-    Two improvements over the V1 fixed graph layer:
-      1. Each edge weight is a free parameter, optimised end-to-end.
-      2. A residual connection lets signal bypass the aggregation.
+    Instead of learning one fixed edge weight per edge, this computes
+    attention weights from the current hidden states of connected sensors.
     """
-    def __init__(self, in_size, out_size, n_sensors, adj_mask):
+    def __init__(self, in_size, out_size, n_sensors, adj_mask, dropout=0.1):
         super().__init__()
-        self.register_buffer("adj_mask", adj_mask.float())  # Register buffer that should not be considered as a model parameter (optimizer does not train it)
-        # Initialise logits at 0 so sigmoid(0)=0.5 — neither suppressed nor amplified
-        self.edge_logits = nn.Parameter(torch.zeros(n_sensors, n_sensors))
-        self.linear = nn.Linear(in_size, out_size)
+        self.register_buffer("adj_mask", adj_mask.float())
+
+        self.linear = nn.Linear(in_size, out_size, bias=False)
+
+        # Learns how important source node i and neighbour j are for edge i <- j
+        self.attn_src = nn.Linear(out_size, 1, bias=False)
+        self.attn_dst = nn.Linear(out_size, 1, bias=False)
+
+        self.leaky_relu = nn.LeakyReLU(0.2)
+        self.dropout = nn.Dropout(0.0)
         self.norm = nn.LayerNorm(out_size)
 
-    def get_adj(self):
-        w = torch.sigmoid(self.edge_logits) * self.adj_mask
-        w = w + torch.eye(w.shape[0], device=w.device)   # self-loop
-        deg = w.sum(dim=1, keepdim=True).clamp(min=1e-6)
-        return w / deg
-
     def forward(self, z):
-        adj = self.get_adj()
-        z_agg = torch.einsum("ij,bjf->bif", adj, z)
-        return self.norm(torch.relu(self.linear(z_agg)))
+        # z: [B, N, F]
+        h = self.linear(z)  # [B, N, out_size]
+
+        src_scores = self.attn_src(h)  # [B, N, 1]
+        dst_scores = self.attn_dst(h)  # [B, N, 1]
+
+        # e_ij = score of neighbour j for target node i
+        e = src_scores + dst_scores.transpose(1, 2)  # [B, N, N]
+        e = self.leaky_relu(e)
+
+        # allow fixed graph edges + self-loops
+        mask = self.adj_mask.clone()
+        mask = mask + torch.eye(mask.shape[0], device=mask.device)
+        mask = mask.clamp(max=1.0)
+
+        e = e.masked_fill(mask.unsqueeze(0) == 0, float("-inf"))
+
+        attn = torch.softmax(e, dim=-1)  # normalize over neighbours j
+        attn = self.dropout(attn)
+
+        z_agg = torch.bmm(attn, h)  # [B, N, out_size]
+
+        return self.norm(torch.relu(z_agg))
 
 
+class Chomp1d(nn.Module):
+    def __init__(self, chomp_size):
+        super().__init__()
+        self.chomp_size = chomp_size
 
-class GRU_GCN_v2(nn.Module):
+    def forward(self, x):
+        return x[:, :, :-self.chomp_size].contiguous()
+
+
+class Conv1D_GCN(nn.Module):
     """
     Enhancements over GRU_GCN (v1):
       1. Learnable adjacency matrix (SADL-inspired edge strength learning)
@@ -121,16 +144,25 @@ class GRU_GCN_v2(nn.Module):
                  n_sensors=36, adj_mask=None):
         super().__init__()
 
+        embedding_size = 8
+
         # Without sensor embedding, two sensors are assumed to be the similar if all
         # features like recent traffic history, road, lanes, direction, graph neighbors
         # are similar. But two sensors could still be different, even if these features look
         # similar. E.g. sensor A could be highway merge bottleneck and sensor B at suburban straight road
         # Embedding helps the model to learn: This sensor usually behaves like this.
-        embedding_size = 8
         self.sensor_emb = nn.Embedding(n_sensors, embedding_size)
 
-        self.gru = nn.GRU(input_size=1, hidden_size=hidden_size,
-                          num_layers=1, batch_first=True)
+        self.temporal_conv = nn.Sequential(
+            nn.Conv1d(1, hidden_size, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=2, dilation=2),
+            nn.ReLU(),
+        )
+        self.temporal_attn = nn.Sequential(
+            nn.Conv1d(hidden_size, 1, kernel_size=1),
+        )
 
         self.static_mlp = nn.Sequential(
             nn.Linear(static_size, 32),
@@ -146,8 +178,10 @@ class GRU_GCN_v2(nn.Module):
         if adj_mask is None:
             adj_mask = torch.ones(n_sensors, n_sensors)
 
-        self.gcn1 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
-        self.gcn2 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
+        self.gcn1 = GraphAttentionConv(hidden_size, hidden_size, n_sensors,
+                                       adj_mask, dropout)
+        self.gcn2 = GraphAttentionConv(hidden_size, hidden_size, n_sensors,
+                                       adj_mask, dropout)
 
         self.head = nn.Sequential(
             nn.Linear(hidden_size, 32),
@@ -156,14 +190,19 @@ class GRU_GCN_v2(nn.Module):
             nn.Linear(32, 1),
         )
 
-    def forward(self, x, adj=None):   # adj param kept for API compatibility
+    def forward(self, x):   # adj param kept for API compatibility
         seq    = x[:, :, :10]
         static = x[:, :, 10:]
         B, N, T = seq.shape
 
-        seq_flat = seq.reshape(B * N, T, 1)
-        _, h = self.gru(seq_flat)
-        h = h[-1].reshape(B, N, -1)
+        seq_flat = seq.reshape(B * N, 1, T)  # [B*N, 1, 10]
+        h = self.temporal_conv(seq_flat)  # [B*N, hidden_size, 10]
+        h = h.mean(dim=-1)  # [B*N, hidden_size]
+        #attn_logits = self.temporal_attn(h)  # [B*N, 1, 10]
+        #attn_weights = torch.softmax(attn_logits, dim=-1)
+        #h = (h * attn_weights).sum(dim=-1)  # [B*N, hidden_size]
+
+        h = h.reshape(B, N, -1)  # [B, N, hidden_size]
 
         s = self.static_mlp(static)
 
@@ -180,7 +219,9 @@ class GRU_GCN_v2(nn.Module):
         return self.head(z_out).squeeze(-1)
 
     def get_learned_adj(self):
-        return self.gcn1.get_adj().detach().cpu().numpy()
+        if hasattr(self.gcn1, "last_graph_attn"):
+            return self.gcn1.last_graph_attn.mean(dim=0).numpy()
+        return None
 
 
 # -------------------------
@@ -202,7 +243,7 @@ def evaluate(model, loader, device, loss_fn, adj, y_mean, y_std):
     with torch.no_grad():
         for x, y in loader:
             x, y = x.to(device), y.to(device)
-            pred  = model(x, adj)
+            pred  = model(x)
             total_loss += float(loss_fn(pred, y).item()) * len(y)
             pred_real = pred * y_std_t + y_mean_t
             pred_real = pred_real.clamp(0.0, 1.0)   # Todo: Maybe remove. Output needs to be between 0 and 1.
@@ -217,9 +258,6 @@ def evaluate(model, loader, device, loss_fn, adj, y_mean, y_std):
 
     return avg_loss, rmse, mae
 
-    return (total_loss / max(len(loader.dataset), 1),
-            np.sqrt(total_sq / max(total, 1)),
-            total_abs / max(total, 1))
 
 
 def dataset_exists(data_dir=".", mat_file="traffic_dataset.mat", npz_file="dataset.npz"):
@@ -316,7 +354,7 @@ def train(args):
     adj_norm = normalize_adj(adj_mat)
     adj_t    = torch.tensor(adj_norm, dtype=torch.float32).to(device)
 
-    model = GRU_GCN_v2(
+    model = Conv1D_GCN(
         hidden_size=args.hidden_size,
         static_size=X_train.shape[-1] - 10,
         dropout=args.dropout,
@@ -360,7 +398,7 @@ def train(args):
         for x, y in train_loader:
             x, y = x.to(device), y.to(device)
             optimizer.zero_grad()
-            pred = model(x, adj_t)
+            pred = model(x)
             loss = loss_fn(pred, y)
             loss.backward()
             optimizer.step()
@@ -408,7 +446,7 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version":    "gru_gcn_v2",
+        "model_version":    "conv1d_gcn",
         "hidden_size":      args.hidden_size,
         "dropout":          args.dropout,
         "n_sensors":        adj_mat.shape[0],
@@ -427,7 +465,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "conv1d_gcn",
+        "model_version": "pure_mlp",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,

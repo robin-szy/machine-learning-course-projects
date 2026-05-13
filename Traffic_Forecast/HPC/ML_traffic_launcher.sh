@@ -8,7 +8,7 @@
 #SBATCH --partition=batch
 #SBATCH --qos=normal
 #SBATCH --time=0-00:30:00 #DD-HH:MM:SS
-#SBATCH --array=1-24
+#SBATCH --array=1-36
 #SBATCH --output=logs/%x_%A_%a.out
 #SBATCH --error=logs/%x_%A_%a.err
 

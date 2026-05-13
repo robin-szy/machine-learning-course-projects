@@ -12,6 +12,7 @@ import torch
 from torch import nn
 from torch.utils.data import Dataset, DataLoader
 from scipy.io import loadmat
+from sklearn.model_selection import train_test_split
 
 
 # -------------------------
@@ -27,16 +28,18 @@ def parse_args():
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--weight-decay", type=float, default=0.001)
-    parser.add_argument("--hidden-size", type=int, default=32)
+    parser.add_argument("--hidden-size", type=int, default=96)
     parser.add_argument("--patience", type=int, default=30)
     parser.add_argument("--min-delta", type=float, default=1e-4)
-    parser.add_argument("--dropout", type=float, default=0.1)
+    parser.add_argument("--dropout", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=523)
     parser.add_argument("--val-frac", type=float, default=0.2)
     parser.add_argument("--loss", type=str, default="huber",
                         choices=["huber", "mse", "smoothl1", "mae"])
     parser.add_argument("--huber-delta", type=float, default=1.0)
     parser.add_argument("--final-train", action="store_true", default=False)
+    parser.add_argument("--stratify", type=str, default="true",
+                        choices=["true", "false"])
     return parser.parse_args()
 
 
@@ -74,63 +77,8 @@ class TrafficDataset(Dataset):
         return torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
 
-class GraphAttentionConv(nn.Module):
-    """
-    Dynamic graph attention over the fixed road topology.
 
-    Instead of learning one fixed edge weight per edge, this computes
-    attention weights from the current hidden states of connected sensors.
-    """
-    def __init__(self, in_size, out_size, n_sensors, adj_mask, dropout=0.1):
-        super().__init__()
-        self.register_buffer("adj_mask", adj_mask.float())
-
-        self.linear = nn.Linear(in_size, out_size, bias=False)
-
-        # Learns how important source node i and neighbour j are for edge i <- j
-        self.attn_src = nn.Linear(out_size, 1, bias=False)
-        self.attn_dst = nn.Linear(out_size, 1, bias=False)
-
-        self.leaky_relu = nn.LeakyReLU(0.2)
-        self.dropout = nn.Dropout(0.0)
-        self.norm = nn.LayerNorm(out_size)
-
-    def forward(self, z):
-        # z: [B, N, F]
-        h = self.linear(z)  # [B, N, out_size]
-
-        src_scores = self.attn_src(h)  # [B, N, 1]
-        dst_scores = self.attn_dst(h)  # [B, N, 1]
-
-        # e_ij = score of neighbour j for target node i
-        e = src_scores + dst_scores.transpose(1, 2)  # [B, N, N]
-        e = self.leaky_relu(e)
-
-        # allow fixed graph edges + self-loops
-        mask = self.adj_mask.clone()
-        mask = mask + torch.eye(mask.shape[0], device=mask.device)
-        mask = mask.clamp(max=1.0)
-
-        e = e.masked_fill(mask.unsqueeze(0) == 0, float("-inf"))
-
-        attn = torch.softmax(e, dim=-1)  # normalize over neighbours j
-        attn = self.dropout(attn)
-
-        z_agg = torch.bmm(attn, h)  # [B, N, out_size]
-
-        return self.norm(torch.relu(z_agg))
-
-
-class Chomp1d(nn.Module):
-    def __init__(self, chomp_size):
-        super().__init__()
-        self.chomp_size = chomp_size
-
-    def forward(self, x):
-        return x[:, :, :-self.chomp_size].contiguous()
-
-
-class Conv1D_GCN(nn.Module):
+class GCN_Conv1D(nn.Module):
     """
     Enhancements over GRU_GCN (v1):
       1. Learnable adjacency matrix (SADL-inspired edge strength learning)
@@ -150,17 +98,6 @@ class Conv1D_GCN(nn.Module):
         # Embedding helps the model to learn: This sensor usually behaves like this.
         self.sensor_emb = nn.Embedding(n_sensors, embedding_size)
 
-        self.temporal_conv = nn.Sequential(
-            nn.Conv1d(1, hidden_size, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=2, dilation=2),
-            nn.ReLU(),
-        )
-        self.temporal_attn = nn.Sequential(
-            nn.Conv1d(hidden_size, 1, kernel_size=1),
-        )
-
         self.static_mlp = nn.Sequential(
             nn.Linear(static_size, 32),
             nn.ReLU(),
@@ -168,17 +105,20 @@ class Conv1D_GCN(nn.Module):
         )
 
         self.combine = nn.Sequential(
-            nn.Linear(hidden_size + 32 + embedding_size, hidden_size),
+            nn.Linear(10 + 32 + embedding_size, hidden_size),
             nn.ReLU(),
         )
 
         if adj_mask is None:
             adj_mask = torch.ones(n_sensors, n_sensors)
 
-        self.gcn1 = GraphAttentionConv(hidden_size, hidden_size, n_sensors,
-                                       adj_mask, dropout)
-        self.gcn2 = GraphAttentionConv(hidden_size, hidden_size, n_sensors,
-                                       adj_mask, dropout)
+        self.post_gcn_mlp = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+        )
 
         self.head = nn.Sequential(
             nn.Linear(hidden_size, 32),
@@ -192,33 +132,20 @@ class Conv1D_GCN(nn.Module):
         static = x[:, :, 10:]
         B, N, T = seq.shape
 
-        seq_flat = seq.reshape(B * N, 1, T)  # [B*N, 1, 10]
-        h = self.temporal_conv(seq_flat)  # [B*N, hidden_size, 10]
-        h = h.mean(dim=-1)  # [B*N, hidden_size]
-        #attn_logits = self.temporal_attn(h)  # [B*N, 1, 10]
-        #attn_weights = torch.softmax(attn_logits, dim=-1)
-        #h = (h * attn_weights).sum(dim=-1)  # [B*N, hidden_size]
-
-        h = h.reshape(B, N, -1)  # [B, N, hidden_size]
-
         s = self.static_mlp(static)
 
         sensor_ids = torch.arange(N, device=x.device)
         e = self.sensor_emb(sensor_ids)  # [N, 8]
         e = e.unsqueeze(0).expand(B, -1, -1)  # [B, N, 8]
 
-        z = self.combine(torch.cat([h, s, e], dim=-1))
+        z = self.combine(torch.cat([seq, s, e], dim=-1))
 
-        z1 = self.gcn1(z)
-        z2 = self.gcn2(z1)
-        z_out = z2 + z    # residual skip
+        h = self.post_gcn_mlp(z)
 
-        return self.head(z_out).squeeze(-1)
+        return self.head(h + z).squeeze(-1)
 
     def get_learned_adj(self):
-        if hasattr(self.gcn1, "last_graph_attn"):
-            return self.gcn1.last_graph_attn.mean(dim=0).numpy()
-        return None
+        return self.gcn1.get_adj().detach().cpu().numpy()
 
 
 # -------------------------
@@ -305,8 +232,22 @@ def train(args):
         print("FINAL TRAINING MODE: full dataset, no early stopping.")
         train_idx, val_idx = indices, None
     else:
-        split = int((1.0 - args.val_frac) * n)
-        train_idx, val_idx = indices[:split], indices[split:]
+        if args.stratify == "true":
+            print("Stratifying validation set")
+
+            y_level = Y_train.mean(axis=1)
+            y_bin = pd.qcut(y_level, q=4, labels=False, duplicates="drop")
+
+            train_idx, val_idx = train_test_split(
+                np.arange(len(X_train)),
+                test_size=args.val_frac,
+                random_state=args.seed,
+                shuffle=True,
+                stratify=y_bin,
+            )
+        else:
+            split = int((1.0 - args.val_frac) * n)
+            train_idx, val_idx = indices[:split], indices[split:]
 
         if len(train_idx) == 0 or len(val_idx) == 0:
             raise ValueError("Train/validation split failed. Check data size and --val-frac.")
@@ -337,7 +278,7 @@ def train(args):
     adj_norm = normalize_adj(adj_mat)
     adj_t    = torch.tensor(adj_norm, dtype=torch.float32).to(device)
 
-    model = Conv1D_GCN(
+    model = GCN_Conv1D(
         hidden_size=args.hidden_size,
         static_size=X_train.shape[-1] - 10,
         dropout=args.dropout,
@@ -370,7 +311,9 @@ def train(args):
             weight_decay=args.weight_decay
         )
 
-    best_rmse, best_mae, best_state = float("inf"), None, None
+    best_rmse, best_mae = float("inf"), None
+    best_train_rmse, best_train_mae = None, None
+    best_state = None
     epochs_no_improve = 0
 
     for epoch in range(args.epochs):
@@ -392,16 +335,24 @@ def train(args):
             val_loss, val_rmse, val_mae = evaluate(
                 model, val_loader, device, loss_fn, adj_t, y_mean, y_std)
 
+            train_eval_loss, train_rmse, train_mae = evaluate(
+                model, train_loader, device, loss_fn, adj_t, y_mean, y_std
+            )
+
             if val_rmse < best_rmse - args.min_delta:
                 best_rmse = val_rmse
                 best_mae  = val_mae
+                best_train_rmse = train_rmse
+                best_train_mae = train_mae
                 best_state = {k: v.detach().cpu().clone()
                               for k, v in model.state_dict().items()}
                 epochs_no_improve = 0
             else:
                 epochs_no_improve += 1
 
-            print(f"epoch {epoch+1:03d} : train={train_loss:.4f}  "
+            print(f"epoch {epoch + 1:03d} : train_loss={train_loss:.4f}  "
+                  f"val_loss={val_loss:.4f}  "
+                  f"train_rmse={train_rmse:.4f}  "
                   f"val_rmse={val_rmse:.4f}  val_mae={val_mae:.4f}  "
                   f"best={best_rmse:.4f}")
 
@@ -420,7 +371,7 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version":    "conv1d_gcn",
+        "model_version":    "pure_mlp",
         "hidden_size":      args.hidden_size,
         "dropout":          args.dropout,
         "n_sensors":        adj_mat.shape[0],
@@ -439,7 +390,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "conv1d_gcn",
+        "model_version": "pure_mlp",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,
@@ -448,7 +399,10 @@ def train(args):
         "seed": args.seed,
         "loss": args.loss,
         "huber_delta": args.huber_delta,
+        "stratify": args.stratify,
         "total_params": total_params,
+        "best_train_mae": best_train_mae if not args.final_train else None,
+        "best_train_rmse": best_train_rmse if not args.final_train else None,
         "best_mae":  best_mae  if not args.final_train else None,
         "best_rmse": best_rmse if not args.final_train else None,
     }

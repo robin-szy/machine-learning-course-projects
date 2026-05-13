@@ -1,3 +1,7 @@
+"""
+In comparison to v2, this version uses Conv1D instead of GRU
+"""
+
 
 import os
 import random
@@ -19,7 +23,7 @@ def parse_args():
     parser.add_argument("--data-dir", default="data")
     parser.add_argument("--mat-file", default="traffic_dataset.mat")
     parser.add_argument("--dataset-file", default="dataset.npz")
-    parser.add_argument("--model-file", default="model_v2.pth")
+    parser.add_argument("--model-file", default="model_v3.pth")
     parser.add_argument("--epochs", type=int, default=300)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=0.001)
@@ -73,10 +77,6 @@ class TrafficDataset(Dataset):
         return torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
 
-# -------------------------
-# Enhanced model (V2)
-# -------------------------
-
 class AdaptiveGraphConv(nn.Module):
     """
     Graph convolution with learnable edge weights.
@@ -109,28 +109,30 @@ class AdaptiveGraphConv(nn.Module):
         return self.norm(torch.relu(self.linear(z_agg)))
 
 
+class Chomp1d(nn.Module):
+    def __init__(self, chomp_size):
+        super().__init__()
+        self.chomp_size = chomp_size
 
-class GRU_GCN_v2(nn.Module):
+    def forward(self, x):
+        return x[:, :, :-self.chomp_size].contiguous()
+
+
+class GCN_Conv1D(nn.Module):
     """
-    Enhancements over GRU_GCN (v1):
-      1. Learnable adjacency matrix (SADL-inspired edge strength learning)
-      2. Two-layer graph convolution  (reaches 2-hop neighbours)
-      3. Residual skip from pre-graph representation
+    GCN first, then temporal Conv1D.
+    For each time step:
+      1. combine current traffic value + static features + sensor embedding
+      2. apply GCN over sensors
+    Then:
+      3. apply Conv1D over time for each sensor
     """
     def __init__(self, hidden_size=64, static_size=38, dropout=0.1,
                  n_sensors=36, adj_mask=None):
         super().__init__()
 
-        # Without sensor embedding, two sensors are assumed to be the similar if all
-        # features like recent traffic history, road, lanes, direction, graph neighbors
-        # are similar. But two sensors could still be different, even if these features look
-        # similar. E.g. sensor A could be highway merge bottleneck and sensor B at suburban straight road
-        # Embedding helps the model to learn: This sensor usually behaves like this.
         embedding_size = 8
         self.sensor_emb = nn.Embedding(n_sensors, embedding_size)
-
-        self.gru = nn.GRU(input_size=1, hidden_size=hidden_size,
-                          num_layers=1, batch_first=True)
 
         self.static_mlp = nn.Sequential(
             nn.Linear(static_size, 32),
@@ -138,8 +140,9 @@ class GRU_GCN_v2(nn.Module):
             nn.Dropout(dropout),
         )
 
-        self.combine = nn.Sequential(
-            nn.Linear(hidden_size + 32 + embedding_size, hidden_size),
+        # One traffic value per time step + static encoding + sensor embedding
+        self.input_proj = nn.Sequential(
+            nn.Linear(1 + 32 + embedding_size, hidden_size),
             nn.ReLU(),
         )
 
@@ -149,6 +152,14 @@ class GRU_GCN_v2(nn.Module):
         self.gcn1 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
         self.gcn2 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
 
+        self.temporal_conv = nn.Sequential(
+            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=1),
+            nn.ReLU(),
+        )
+
         self.head = nn.Sequential(
             nn.Linear(hidden_size, 32),
             nn.ReLU(),
@@ -156,32 +167,47 @@ class GRU_GCN_v2(nn.Module):
             nn.Linear(32, 1),
         )
 
-    def forward(self, x, adj=None):   # adj param kept for API compatibility
-        seq    = x[:, :, :10]
-        static = x[:, :, 10:]
+    def forward(self, x):
+        seq    = x[:, :, :10]     # [B, N, T]
+        static = x[:, :, 10:]     # [B, N, static_size]
         B, N, T = seq.shape
 
-        seq_flat = seq.reshape(B * N, T, 1)
-        _, h = self.gru(seq_flat)
-        h = h[-1].reshape(B, N, -1)
-
-        s = self.static_mlp(static)
+        s = self.static_mlp(static)  # [B, N, 32]
 
         sensor_ids = torch.arange(N, device=x.device)
-        e = self.sensor_emb(sensor_ids)  # [N, 8]
-        e = e.unsqueeze(0).expand(B, -1, -1)  # [B, N, 8]
+        e = self.sensor_emb(sensor_ids)          # [N, emb]
+        e = e.unsqueeze(0).expand(B, -1, -1)     # [B, N, emb]
 
-        z = self.combine(torch.cat([h, s, e], dim=-1))
+        gcn_outputs = []
 
-        z1 = self.gcn1(z)
-        z2 = self.gcn2(z1)
-        z_out = z2 + z    # residual skip
+        for t in range(T):
+            traffic_t = seq[:, :, t:t+1]         # [B, N, 1]
 
-        return self.head(z_out).squeeze(-1)
+            z_t = self.input_proj(
+                torch.cat([traffic_t, s, e], dim=-1)
+            )                                   # [B, N, H]
+
+            z1 = self.gcn1(z_t)
+            z2 = self.gcn2(z1)
+            z_out = z2 + z_t                    # residual
+
+            gcn_outputs.append(z_out)
+
+        h = torch.stack(gcn_outputs, dim=2)      # [B, N, T, H]
+
+        # Conv1D expects [batch, channels, time]
+        h = h.reshape(B * N, T, -1)              # [B*N, T, H]
+        h = h.transpose(1, 2)                    # [B*N, H, T]
+
+        h = self.temporal_conv(h)                # [B*N, H, T]
+        h = h.mean(dim=-1)                       # [B*N, H]
+
+        h = h.reshape(B, N, -1)                  # [B, N, H]
+
+        return self.head(h).squeeze(-1)
 
     def get_learned_adj(self):
         return self.gcn1.get_adj().detach().cpu().numpy()
-
 
 # -------------------------
 # Training  (identical logic to v1, different model class)
@@ -202,7 +228,7 @@ def evaluate(model, loader, device, loss_fn, adj, y_mean, y_std):
     with torch.no_grad():
         for x, y in loader:
             x, y = x.to(device), y.to(device)
-            pred  = model(x, adj)
+            pred  = model(x)
             total_loss += float(loss_fn(pred, y).item()) * len(y)
             pred_real = pred * y_std_t + y_mean_t
             pred_real = pred_real.clamp(0.0, 1.0)   # Todo: Maybe remove. Output needs to be between 0 and 1.
@@ -217,9 +243,6 @@ def evaluate(model, loader, device, loss_fn, adj, y_mean, y_std):
 
     return avg_loss, rmse, mae
 
-    return (total_loss / max(len(loader.dataset), 1),
-            np.sqrt(total_sq / max(total, 1)),
-            total_abs / max(total, 1))
 
 
 def dataset_exists(data_dir=".", mat_file="traffic_dataset.mat", npz_file="dataset.npz"):
@@ -316,7 +339,7 @@ def train(args):
     adj_norm = normalize_adj(adj_mat)
     adj_t    = torch.tensor(adj_norm, dtype=torch.float32).to(device)
 
-    model = GRU_GCN_v2(
+    model = GCN_Conv1D(
         hidden_size=args.hidden_size,
         static_size=X_train.shape[-1] - 10,
         dropout=args.dropout,
@@ -360,7 +383,7 @@ def train(args):
         for x, y in train_loader:
             x, y = x.to(device), y.to(device)
             optimizer.zero_grad()
-            pred = model(x, adj_t)
+            pred = model(x)
             loss = loss_fn(pred, y)
             loss.backward()
             optimizer.step()
@@ -372,6 +395,7 @@ def train(args):
         if not args.final_train:
             val_loss, val_rmse, val_mae = evaluate(
                 model, val_loader, device, loss_fn, adj_t, y_mean, y_std)
+
             train_eval_loss, train_rmse, train_mae = evaluate(
                 model, train_loader, device, loss_fn, adj_t, y_mean, y_std
             )
@@ -408,7 +432,7 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version":    "gru_gcn_v2",
+        "model_version":    "conv1d_gcn",
         "hidden_size":      args.hidden_size,
         "dropout":          args.dropout,
         "n_sensors":        adj_mat.shape[0],
@@ -440,7 +464,7 @@ def train(args):
         "total_params": total_params,
         "best_train_mae": best_train_mae if not args.final_train else None,
         "best_train_rmse": best_train_rmse if not args.final_train else None,
-        "best_mae": best_mae if not args.final_train else None,
+        "best_mae":  best_mae  if not args.final_train else None,
         "best_rmse": best_rmse if not args.final_train else None,
     }
     df = pd.DataFrame([row])
