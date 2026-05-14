@@ -22,12 +22,12 @@ def parse_args():
     parser.add_argument("--model-file", default="model_v2.pth")
     parser.add_argument("--epochs", type=int, default=300)
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--lr", type=float, default=0.0008)
     parser.add_argument("--weight-decay", type=float, default=0.001)
-    parser.add_argument("--hidden-size", type=int, default=32)
+    parser.add_argument("--hidden-size", type=int, default=64)
     parser.add_argument("--patience", type=int, default=30)
     parser.add_argument("--min-delta", type=float, default=1e-4)
-    parser.add_argument("--dropout", type=float, default=0.1)
+    parser.add_argument("--dropout", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=523)
     parser.add_argument("--val-frac", type=float, default=0.2)
     parser.add_argument("--loss", type=str, default="huber",
@@ -352,6 +352,7 @@ def train(args):
     best_rmse, best_mae = float("inf"), None
     best_train_rmse, best_train_mae = None, None
     best_state = None
+    best_epoch = None
     epochs_no_improve = 0
 
     for epoch in range(args.epochs):
@@ -381,6 +382,7 @@ def train(args):
                 best_mae  = val_mae
                 best_train_rmse = train_rmse
                 best_train_mae = train_mae
+                best_epoch = epoch + 1
                 best_state = {k: v.detach().cpu().clone()
                               for k, v in model.state_dict().items()}
                 epochs_no_improve = 0
@@ -438,6 +440,7 @@ def train(args):
         "huber_delta": args.huber_delta,
         "stratify": args.stratify,
         "total_params": total_params,
+        "best_epoch": best_epoch if not args.final_train else args.epochs,
         "best_train_mae": best_train_mae if not args.final_train else None,
         "best_train_rmse": best_train_rmse if not args.final_train else None,
         "best_mae": best_mae if not args.final_train else None,

@@ -1,6 +1,3 @@
-"""
-In comparison to v2, this version uses Conv1D instead of GRU
-"""
 
 
 import os
@@ -26,19 +23,20 @@ def parse_args():
     parser.add_argument("--model-file", default="model_v3.pth")
     parser.add_argument("--epochs", type=int, default=300)
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--lr", type=float, default=0.002)
     parser.add_argument("--weight-decay", type=float, default=0.001)
-    parser.add_argument("--hidden-size", type=int, default=32)
+    parser.add_argument("--hidden-size", type=int, default=64)
     parser.add_argument("--patience", type=int, default=30)
     parser.add_argument("--min-delta", type=float, default=1e-4)
-    parser.add_argument("--dropout", type=float, default=0.15)
+    parser.add_argument("--dropout", type=float, default=0.3)
     parser.add_argument("--seed", type=int, default=523)
     parser.add_argument("--val-frac", type=float, default=0.2)
     parser.add_argument("--loss", type=str, default="huber",
                         choices=["huber", "mse", "smoothl1", "mae"])
     parser.add_argument("--huber-delta", type=float, default=1.0)
     parser.add_argument("--final-train", action="store_true", default=False)
-    parser.add_argument("--stratify", type=str, default="true",choices=["true", "false"])
+    parser.add_argument("--stratify", type=str, default="true",
+                        choices=["true", "false"])
     return parser.parse_args()
 
 
@@ -117,7 +115,7 @@ class Chomp1d(nn.Module):
         return x[:, :, :-self.chomp_size].contiguous()
 
 
-class Conv1D_GCN(nn.Module):
+class GCN_Conv1D(nn.Module):
     """
     Enhancements over GRU_GCN (v1):
       1. Learnable adjacency matrix (SADL-inspired edge strength learning)
@@ -137,14 +135,6 @@ class Conv1D_GCN(nn.Module):
         # Embedding helps the model to learn: This sensor usually behaves like this.
         self.sensor_emb = nn.Embedding(n_sensors, embedding_size)
 
-        self.temporal_conv = nn.Sequential(
-            nn.Conv1d(1, hidden_size, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=2, dilation=2),
-            nn.ReLU(),
-        )
-
         self.static_mlp = nn.Sequential(
             nn.Linear(static_size, 32),
             nn.ReLU(),
@@ -152,7 +142,7 @@ class Conv1D_GCN(nn.Module):
         )
 
         self.combine = nn.Sequential(
-            nn.Linear(hidden_size + 32 + embedding_size, hidden_size),
+            nn.Linear(10 + 32 + embedding_size, hidden_size),
             nn.ReLU(),
         )
 
@@ -161,6 +151,14 @@ class Conv1D_GCN(nn.Module):
 
         self.gcn1 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
         self.gcn2 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
+
+        self.post_gcn_mlp = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_size, hidden_size),
+            nn.ReLU(),
+        )
 
         self.head = nn.Sequential(
             nn.Linear(hidden_size, 32),
@@ -174,24 +172,21 @@ class Conv1D_GCN(nn.Module):
         static = x[:, :, 10:]
         B, N, T = seq.shape
 
-        seq_flat = seq.reshape(B * N, 1, T)  # [B*N, 1, 10]
-        h = self.temporal_conv(seq_flat)  # [B*N, hidden_size, 10]
-        h = h.mean(dim=-1)  # [B*N, hidden_size]
-        h = h.reshape(B, N, -1)  # [B, N, hidden_size]
-
         s = self.static_mlp(static)
 
         sensor_ids = torch.arange(N, device=x.device)
         e = self.sensor_emb(sensor_ids)  # [N, 8]
         e = e.unsqueeze(0).expand(B, -1, -1)  # [B, N, 8]
 
-        z = self.combine(torch.cat([h, s, e], dim=-1))
+        z = self.combine(torch.cat([seq, s, e], dim=-1))
 
         z1 = self.gcn1(z)
         z2 = self.gcn2(z1)
         z_out = z2 + z    # residual skip
 
-        return self.head(z_out).squeeze(-1)
+        h = self.post_gcn_mlp(z_out)
+
+        return self.head(h + z_out).squeeze(-1)
 
     def get_learned_adj(self):
         return self.gcn1.get_adj().detach().cpu().numpy()
@@ -259,30 +254,6 @@ def dataset_exists(data_dir=".", mat_file="traffic_dataset.mat", npz_file="datas
     return npz_path
 
 
-def get_baseline(loader, device, y_mean, y_std):
-    # Just to compare against a baseline
-    total_sq = total_abs = total = 0.0
-
-    y_mean_t = torch.tensor(y_mean, dtype=torch.float32, device=device)
-    y_std_t  = torch.tensor(y_std,  dtype=torch.float32, device=device)
-
-    with torch.no_grad():
-        for x, y in loader:
-            x, y = x.to(device), y.to(device)
-
-            pred = x[:, :, 9]   # last observed traffic value, already normalized
-
-            pred_real = pred * y_std_t + y_mean_t
-            y_real    = y    * y_std_t + y_mean_t
-
-            total_sq  += torch.sum((pred_real - y_real) ** 2).item()
-            total_abs += torch.sum(torch.abs(pred_real - y_real)).item()
-            total     += y_real.numel()
-
-    rmse = np.sqrt(total_sq / total)
-    mae = total_abs / total
-    return rmse, mae
-
 
 def train(args):
     set_seed(args.seed)
@@ -307,20 +278,16 @@ def train(args):
     else:
         if args.stratify == "true":
             print("Stratifying validation set")
-            #hour = X_train[:, 0, 15:38].argmax(axis=1)
+
             y_level = Y_train.mean(axis=1)
-
-            # bin traffic level into low / medium / high
             y_bin = pd.qcut(y_level, q=4, labels=False, duplicates="drop")
-
-            #strata = np.array([f"{h}_{b}" for h, b in zip(hour, y_bin)])
 
             train_idx, val_idx = train_test_split(
                 np.arange(len(X_train)),
                 test_size=args.val_frac,
                 random_state=args.seed,
                 shuffle=True,
-                stratify=y_bin,#strata,
+                stratify=y_bin,
             )
         else:
             split = int((1.0 - args.val_frac) * n)
@@ -347,8 +314,6 @@ def train(args):
     if not args.final_train:
         val_ds = TrafficDataset(X_val, Y_val, continuous_idx, x_mean, x_std, y_mean, y_std)
         val_loader = DataLoader(val_ds, batch_size=args.batch_size, shuffle=False)
-        p_rmse, p_mae = get_baseline(val_loader, device, y_mean, y_std)
-        print(f"Persistence baseline: val_rmse={p_rmse:.4f}  val_mae={p_mae:.4f}")
 
     # Build adj_mask (binary topology) for the learnable GCN
     adj_mask = torch.tensor((adj_mat > 0.5).astype(np.float32))
@@ -357,7 +322,7 @@ def train(args):
     adj_norm = normalize_adj(adj_mat)
     adj_t    = torch.tensor(adj_norm, dtype=torch.float32).to(device)
 
-    model = Conv1D_GCN(
+    model = GCN_Conv1D(
         hidden_size=args.hidden_size,
         static_size=X_train.shape[-1] - 10,
         dropout=args.dropout,
@@ -414,7 +379,6 @@ def train(args):
         if not args.final_train:
             val_loss, val_rmse, val_mae = evaluate(
                 model, val_loader, device, loss_fn, adj_t, y_mean, y_std)
-
             train_eval_loss, train_rmse, train_mae = evaluate(
                 model, train_loader, device, loss_fn, adj_t, y_mean, y_std
             )
@@ -431,7 +395,7 @@ def train(args):
             else:
                 epochs_no_improve += 1
 
-            print(f"epoch {epoch+1:03d} : train_loss={train_loss:.4f}  "
+            print(f"epoch {epoch + 1:03d} : train_loss={train_loss:.4f}  "
                   f"val_loss={val_loss:.4f}  "
                   f"train_rmse={train_rmse:.4f}  "
                   f"val_rmse={val_rmse:.4f}  val_mae={val_mae:.4f}  "
@@ -452,20 +416,16 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version": "conv1d_gcn_hl32",
-        "hidden_size": args.hidden_size,
-        "dropout": args.dropout,
-        "n_sensors": adj_mat.shape[0],
-        "static_size": X_train.shape[-1] - 10,
-        "continuous_idx": continuous_idx,
-        "adj_mask": adj_mask,
-        "x_mean": torch.tensor(x_mean, dtype=torch.float32),
-        "x_std": torch.tensor(x_std, dtype=torch.float32),
-        "y_mean": torch.tensor(y_mean, dtype=torch.float32),
-        "y_std": torch.tensor(y_std, dtype=torch.float32),
-        "huber_delta": args.huber_delta,
-        "seed": args.seed,
-        "final_train": args.final_train,
+        "model_version":    "conv1d_gcn",
+        "hidden_size":      args.hidden_size,
+        "dropout":          args.dropout,
+        "n_sensors":        adj_mat.shape[0],
+        "adj_mask":         adj_mask,
+        "x_mean":           torch.tensor(x_mean, dtype=torch.float32),
+        "x_std":            torch.tensor(x_std,  dtype=torch.float32),
+        "y_mean":           torch.tensor(y_mean, dtype=torch.float32),
+        "y_std":            torch.tensor(y_std,  dtype=torch.float32),
+        "huber_delta":      args.huber_delta,
     }
     torch.save(checkpoint, args.model_file)
     print(f"Saved model to {args.model_file}  (best RMSE={best_rmse:.4f})")
@@ -475,7 +435,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "pure_mlp",
+        "model_version": "conv1d_gcn",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,
@@ -499,119 +459,5 @@ def train(args):
         df.to_csv(results_file, index=False)
 
 
-
-def test_on_labeled_set(data_dir="data",
-                        dataset_file="dataset.npz",
-                        model_file="model_v3.pth",
-                        output_csv=None):
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    checkpoint = torch.load(model_file, map_location=device, weights_only=True)
-
-    data_path = os.path.join(data_dir, dataset_file)
-    data = np.load(data_path)
-
-    X_test = data["X_test"]
-    Y_test = data["Y_test"]
-
-    adj_mask = checkpoint["adj_mask"]
-
-    model = Conv1D_GCN(
-        hidden_size=int(checkpoint["hidden_size"]),
-        static_size=int(checkpoint.get("static_size", X_test.shape[-1] - 10)),
-        dropout=float(checkpoint["dropout"]),
-        n_sensors=int(checkpoint["n_sensors"]),
-        adj_mask=adj_mask,
-    ).to(device)
-
-    model.load_state_dict(checkpoint["model_state_dict"])
-    model.eval()
-
-    continuous_idx = checkpoint.get("continuous_idx", list(range(10)) + [39])
-    x_mean = checkpoint["x_mean"].cpu().numpy()
-    x_std = checkpoint["x_std"].cpu().numpy()
-    y_mean = float(checkpoint["y_mean"])
-    y_std = float(checkpoint["y_std"])
-
-    test_ds = TrafficDataset(
-        X_test,
-        Y_test,
-        continuous_idx=continuous_idx,
-        x_mean=x_mean,
-        x_std=x_std,
-        y_mean=y_mean,
-        y_std=y_std,
-    )
-
-    test_loader = DataLoader(test_ds, batch_size=32, shuffle=False)
-
-    y_true_all = []
-    y_pred_all = []
-
-    y_mean_t = torch.tensor(y_mean, dtype=torch.float32, device=device)
-    y_std_t = torch.tensor(y_std, dtype=torch.float32, device=device)
-
-    with torch.no_grad():
-        for x, y in test_loader:
-            x = x.to(device)
-            y = y.to(device)
-
-            pred = model(x)
-
-            pred_real = pred * y_std_t + y_mean_t
-            pred_real = pred_real.clamp(0.0, 1.0)
-
-            y_real = y * y_std_t + y_mean_t
-
-            y_pred_all.append(pred_real.cpu().numpy())
-            y_true_all.append(y_real.cpu().numpy())
-
-    y_pred = np.concatenate(y_pred_all, axis=0)
-    y_true = np.concatenate(y_true_all, axis=0)
-
-    rmse = float(np.sqrt(np.mean((y_pred - y_true) ** 2)))
-    mae = float(np.mean(np.abs(y_pred - y_true)))
-
-    print(f"Test samples: {len(y_true)}")
-    print(f"Test RMSE: {rmse:.4f}")
-    print(f"Test MAE:  {mae:.4f}")
-
-    rows = []
-    for t in range(y_true.shape[0]):
-        for sensor in range(y_true.shape[1]):
-            rows.append({
-                "time_idx": t,
-                "sensor": sensor,
-                "true": float(y_true[t, sensor]),
-                "pred": float(y_pred[t, sensor]),
-                "abs_error": float(abs(y_pred[t, sensor] - y_true[t, sensor])),
-                "sq_error": float((y_pred[t, sensor] - y_true[t, sensor]) ** 2),
-            })
-
-    pred_df = pd.DataFrame(rows)
-
-    if output_csv is not None:
-        pred_df.to_csv(output_csv, index=False)
-        print(f"Saved predictions to {output_csv}")
-
-    return {
-        "rmse": rmse,
-        "mae": mae,
-        "n_time_steps": y_true.shape[0],
-        "n_predictions": y_true.size,
-        "predictions": pred_df,
-    }
-
-
 if __name__ == "__main__":
-    #train(parse_args())
-
-    # Only uncomment when you actually want to test final models
-    args = parse_args()
-    test_on_labeled_set(
-        data_dir=args.data_dir,
-        dataset_file=args.dataset_file,
-        model_file=args.model_file,
-        output_csv="runs/test_predictions.csv",
-    )
+    train(parse_args())

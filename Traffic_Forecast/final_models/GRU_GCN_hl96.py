@@ -1,7 +1,3 @@
-"""
-In comparison to v2, this version uses Conv1D instead of GRU
-"""
-
 
 import os
 import random
@@ -23,15 +19,15 @@ def parse_args():
     parser.add_argument("--data-dir", default="data")
     parser.add_argument("--mat-file", default="traffic_dataset.mat")
     parser.add_argument("--dataset-file", default="dataset.npz")
-    parser.add_argument("--model-file", default="model_v3.pth")
+    parser.add_argument("--model-file", default="model_v2.pth")
     parser.add_argument("--epochs", type=int, default=300)
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--lr", type=float, default=0.0008)
     parser.add_argument("--weight-decay", type=float, default=0.001)
-    parser.add_argument("--hidden-size", type=int, default=128)
+    parser.add_argument("--hidden-size", type=int, default=96)
     parser.add_argument("--patience", type=int, default=30)
     parser.add_argument("--min-delta", type=float, default=1e-4)
-    parser.add_argument("--dropout", type=float, default=0.1)
+    parser.add_argument("--dropout", type=float, default=0.2)
     parser.add_argument("--seed", type=int, default=523)
     parser.add_argument("--val-frac", type=float, default=0.2)
     parser.add_argument("--loss", type=str, default="huber",
@@ -77,6 +73,10 @@ class TrafficDataset(Dataset):
         return torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
 
+# -------------------------
+# Enhanced model (V2)
+# -------------------------
+
 class AdaptiveGraphConv(nn.Module):
     """
     Graph convolution with learnable edge weights.
@@ -109,16 +109,8 @@ class AdaptiveGraphConv(nn.Module):
         return self.norm(torch.relu(self.linear(z_agg)))
 
 
-class Chomp1d(nn.Module):
-    def __init__(self, chomp_size):
-        super().__init__()
-        self.chomp_size = chomp_size
 
-    def forward(self, x):
-        return x[:, :, :-self.chomp_size].contiguous()
-
-
-class GCN_Conv1D(nn.Module):
+class GRU_GCN_v2(nn.Module):
     """
     Enhancements over GRU_GCN (v1):
       1. Learnable adjacency matrix (SADL-inspired edge strength learning)
@@ -129,22 +121,16 @@ class GCN_Conv1D(nn.Module):
                  n_sensors=36, adj_mask=None):
         super().__init__()
 
-        embedding_size = 8
-
         # Without sensor embedding, two sensors are assumed to be the similar if all
         # features like recent traffic history, road, lanes, direction, graph neighbors
         # are similar. But two sensors could still be different, even if these features look
         # similar. E.g. sensor A could be highway merge bottleneck and sensor B at suburban straight road
         # Embedding helps the model to learn: This sensor usually behaves like this.
+        embedding_size = 8
         self.sensor_emb = nn.Embedding(n_sensors, embedding_size)
 
-        self.temporal_conv = nn.Sequential(
-            nn.Conv1d(1, hidden_size, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=2, dilation=2),
-            nn.ReLU(),
-        )
+        self.gru = nn.GRU(input_size=1, hidden_size=hidden_size,
+                          num_layers=1, batch_first=True)
 
         self.static_mlp = nn.Sequential(
             nn.Linear(static_size, 32),
@@ -153,7 +139,7 @@ class GCN_Conv1D(nn.Module):
         )
 
         self.combine = nn.Sequential(
-            nn.Linear(10 + 32 + embedding_size, hidden_size),
+            nn.Linear(hidden_size + 32 + embedding_size, hidden_size),
             nn.ReLU(),
         )
 
@@ -163,14 +149,6 @@ class GCN_Conv1D(nn.Module):
         self.gcn1 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
         self.gcn2 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
 
-        self.post_gcn_mlp = nn.Sequential(
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-            nn.Dropout(dropout),
-            nn.Linear(hidden_size, hidden_size),
-            nn.ReLU(),
-        )
-
         self.head = nn.Sequential(
             nn.Linear(hidden_size, 32),
             nn.ReLU(),
@@ -178,10 +156,14 @@ class GCN_Conv1D(nn.Module):
             nn.Linear(32, 1),
         )
 
-    def forward(self, x):   # adj param kept for API compatibility
+    def forward(self, x, adj=None):   # adj param kept for API compatibility
         seq    = x[:, :, :10]
         static = x[:, :, 10:]
         B, N, T = seq.shape
+
+        seq_flat = seq.reshape(B * N, T, 1)
+        _, h = self.gru(seq_flat)
+        h = h[-1].reshape(B, N, -1)
 
         s = self.static_mlp(static)
 
@@ -189,15 +171,13 @@ class GCN_Conv1D(nn.Module):
         e = self.sensor_emb(sensor_ids)  # [N, 8]
         e = e.unsqueeze(0).expand(B, -1, -1)  # [B, N, 8]
 
-        z = self.combine(torch.cat([seq, s, e], dim=-1))
+        z = self.combine(torch.cat([h, s, e], dim=-1))
 
         z1 = self.gcn1(z)
         z2 = self.gcn2(z1)
         z_out = z2 + z    # residual skip
 
-        h = self.post_gcn_mlp(z_out)
-
-        return self.head(h + z_out).squeeze(-1)
+        return self.head(z_out).squeeze(-1)
 
     def get_learned_adj(self):
         return self.gcn1.get_adj().detach().cpu().numpy()
@@ -222,7 +202,7 @@ def evaluate(model, loader, device, loss_fn, adj, y_mean, y_std):
     with torch.no_grad():
         for x, y in loader:
             x, y = x.to(device), y.to(device)
-            pred  = model(x)
+            pred  = model(x, adj)
             total_loss += float(loss_fn(pred, y).item()) * len(y)
             pred_real = pred * y_std_t + y_mean_t
             pred_real = pred_real.clamp(0.0, 1.0)   # Todo: Maybe remove. Output needs to be between 0 and 1.
@@ -237,6 +217,9 @@ def evaluate(model, loader, device, loss_fn, adj, y_mean, y_std):
 
     return avg_loss, rmse, mae
 
+    return (total_loss / max(len(loader.dataset), 1),
+            np.sqrt(total_sq / max(total, 1)),
+            total_abs / max(total, 1))
 
 
 def dataset_exists(data_dir=".", mat_file="traffic_dataset.mat", npz_file="dataset.npz"):
@@ -333,7 +316,7 @@ def train(args):
     adj_norm = normalize_adj(adj_mat)
     adj_t    = torch.tensor(adj_norm, dtype=torch.float32).to(device)
 
-    model = GCN_Conv1D(
+    model = GRU_GCN_v2(
         hidden_size=args.hidden_size,
         static_size=X_train.shape[-1] - 10,
         dropout=args.dropout,
@@ -369,6 +352,7 @@ def train(args):
     best_rmse, best_mae = float("inf"), None
     best_train_rmse, best_train_mae = None, None
     best_state = None
+    best_epoch = None
     epochs_no_improve = 0
 
     for epoch in range(args.epochs):
@@ -377,7 +361,7 @@ def train(args):
         for x, y in train_loader:
             x, y = x.to(device), y.to(device)
             optimizer.zero_grad()
-            pred = model(x)
+            pred = model(x, adj_t)
             loss = loss_fn(pred, y)
             loss.backward()
             optimizer.step()
@@ -398,6 +382,7 @@ def train(args):
                 best_mae  = val_mae
                 best_train_rmse = train_rmse
                 best_train_mae = train_mae
+                best_epoch = epoch + 1
                 best_state = {k: v.detach().cpu().clone()
                               for k, v in model.state_dict().items()}
                 epochs_no_improve = 0
@@ -425,7 +410,7 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version":    "conv1d_gcn",
+        "model_version":    "gru_gcn_v2",
         "hidden_size":      args.hidden_size,
         "dropout":          args.dropout,
         "n_sensors":        adj_mat.shape[0],
@@ -455,6 +440,7 @@ def train(args):
         "huber_delta": args.huber_delta,
         "stratify": args.stratify,
         "total_params": total_params,
+        "best_epoch": best_epoch if not args.final_train else args.epochs,
         "best_train_mae": best_train_mae if not args.final_train else None,
         "best_train_rmse": best_train_rmse if not args.final_train else None,
         "best_mae": best_mae if not args.final_train else None,

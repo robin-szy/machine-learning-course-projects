@@ -1,6 +1,3 @@
-"""
-In comparison to v2, this version uses Conv1D instead of GRU
-"""
 
 
 import os
@@ -26,12 +23,12 @@ def parse_args():
     parser.add_argument("--model-file", default="model_v3.pth")
     parser.add_argument("--epochs", type=int, default=300)
     parser.add_argument("--batch-size", type=int, default=32)
-    parser.add_argument("--lr", type=float, default=0.001)
+    parser.add_argument("--lr", type=float, default=0.002)
     parser.add_argument("--weight-decay", type=float, default=0.001)
     parser.add_argument("--hidden-size", type=int, default=32)
     parser.add_argument("--patience", type=int, default=30)
     parser.add_argument("--min-delta", type=float, default=1e-4)
-    parser.add_argument("--dropout", type=float, default=0.1)
+    parser.add_argument("--dropout", type=float, default=0.3)
     parser.add_argument("--seed", type=int, default=523)
     parser.add_argument("--val-frac", type=float, default=0.2)
     parser.add_argument("--loss", type=str, default="huber",
@@ -120,18 +117,22 @@ class Chomp1d(nn.Module):
 
 class GCN_Conv1D(nn.Module):
     """
-    GCN first, then temporal Conv1D.
-    For each time step:
-      1. combine current traffic value + static features + sensor embedding
-      2. apply GCN over sensors
-    Then:
-      3. apply Conv1D over time for each sensor
+    Enhancements over GRU_GCN (v1):
+      1. Learnable adjacency matrix (SADL-inspired edge strength learning)
+      2. Two-layer graph convolution  (reaches 2-hop neighbours)
+      3. Residual skip from pre-graph representation
     """
     def __init__(self, hidden_size=64, static_size=38, dropout=0.1,
                  n_sensors=36, adj_mask=None):
         super().__init__()
 
         embedding_size = 8
+
+        # Without sensor embedding, two sensors are assumed to be the similar if all
+        # features like recent traffic history, road, lanes, direction, graph neighbors
+        # are similar. But two sensors could still be different, even if these features look
+        # similar. E.g. sensor A could be highway merge bottleneck and sensor B at suburban straight road
+        # Embedding helps the model to learn: This sensor usually behaves like this.
         self.sensor_emb = nn.Embedding(n_sensors, embedding_size)
 
         self.static_mlp = nn.Sequential(
@@ -140,9 +141,8 @@ class GCN_Conv1D(nn.Module):
             nn.Dropout(dropout),
         )
 
-        # One traffic value per time step + static encoding + sensor embedding
-        self.input_proj = nn.Sequential(
-            nn.Linear(1 + 32 + embedding_size, hidden_size),
+        self.combine = nn.Sequential(
+            nn.Linear(10 + 32 + embedding_size, hidden_size),
             nn.ReLU(),
         )
 
@@ -152,11 +152,11 @@ class GCN_Conv1D(nn.Module):
         self.gcn1 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
         self.gcn2 = AdaptiveGraphConv(hidden_size, hidden_size, n_sensors, adj_mask)
 
-        self.temporal_conv = nn.Sequential(
-            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=1),
+        self.post_gcn_mlp = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
             nn.Dropout(dropout),
-            nn.Conv1d(hidden_size, hidden_size, kernel_size=3, padding=1),
+            nn.Linear(hidden_size, hidden_size),
             nn.ReLU(),
         )
 
@@ -167,47 +167,30 @@ class GCN_Conv1D(nn.Module):
             nn.Linear(32, 1),
         )
 
-    def forward(self, x):
-        seq    = x[:, :, :10]     # [B, N, T]
-        static = x[:, :, 10:]     # [B, N, static_size]
+    def forward(self, x):   # adj param kept for API compatibility
+        seq    = x[:, :, :10]
+        static = x[:, :, 10:]
         B, N, T = seq.shape
 
-        s = self.static_mlp(static)  # [B, N, 32]
+        s = self.static_mlp(static)
 
         sensor_ids = torch.arange(N, device=x.device)
-        e = self.sensor_emb(sensor_ids)          # [N, emb]
-        e = e.unsqueeze(0).expand(B, -1, -1)     # [B, N, emb]
+        e = self.sensor_emb(sensor_ids)  # [N, 8]
+        e = e.unsqueeze(0).expand(B, -1, -1)  # [B, N, 8]
 
-        gcn_outputs = []
+        z = self.combine(torch.cat([seq, s, e], dim=-1))
 
-        for t in range(T):
-            traffic_t = seq[:, :, t:t+1]         # [B, N, 1]
+        z1 = self.gcn1(z)
+        z2 = self.gcn2(z1)
+        z_out = z2 + z    # residual skip
 
-            z_t = self.input_proj(
-                torch.cat([traffic_t, s, e], dim=-1)
-            )                                   # [B, N, H]
+        h = self.post_gcn_mlp(z_out)
 
-            z1 = self.gcn1(z_t)
-            z2 = self.gcn2(z1)
-            z_out = z2 + z_t                    # residual
-
-            gcn_outputs.append(z_out)
-
-        h = torch.stack(gcn_outputs, dim=2)      # [B, N, T, H]
-
-        # Conv1D expects [batch, channels, time]
-        h = h.reshape(B * N, T, -1)              # [B*N, T, H]
-        h = h.transpose(1, 2)                    # [B*N, H, T]
-
-        h = self.temporal_conv(h)                # [B*N, H, T]
-        h = h.mean(dim=-1)                       # [B*N, H]
-
-        h = h.reshape(B, N, -1)                  # [B, N, H]
-
-        return self.head(h).squeeze(-1)
+        return self.head(h + z_out).squeeze(-1)
 
     def get_learned_adj(self):
         return self.gcn1.get_adj().detach().cpu().numpy()
+
 
 # -------------------------
 # Training  (identical logic to v1, different model class)
@@ -375,6 +358,7 @@ def train(args):
     best_rmse, best_mae = float("inf"), None
     best_train_rmse, best_train_mae = None, None
     best_state = None
+    best_epoch = None
     epochs_no_improve = 0
 
     for epoch in range(args.epochs):
@@ -395,7 +379,6 @@ def train(args):
         if not args.final_train:
             val_loss, val_rmse, val_mae = evaluate(
                 model, val_loader, device, loss_fn, adj_t, y_mean, y_std)
-
             train_eval_loss, train_rmse, train_mae = evaluate(
                 model, train_loader, device, loss_fn, adj_t, y_mean, y_std
             )
@@ -405,6 +388,7 @@ def train(args):
                 best_mae  = val_mae
                 best_train_rmse = train_rmse
                 best_train_mae = train_mae
+                best_epoch = epoch + 1
                 best_state = {k: v.detach().cpu().clone()
                               for k, v in model.state_dict().items()}
                 epochs_no_improve = 0
@@ -462,9 +446,10 @@ def train(args):
         "huber_delta": args.huber_delta,
         "stratify": args.stratify,
         "total_params": total_params,
+        "best_epoch": best_epoch if not args.final_train else args.epochs,
         "best_train_mae": best_train_mae if not args.final_train else None,
         "best_train_rmse": best_train_rmse if not args.final_train else None,
-        "best_mae":  best_mae  if not args.final_train else None,
+        "best_mae": best_mae if not args.final_train else None,
         "best_rmse": best_rmse if not args.final_train else None,
     }
     df = pd.DataFrame([row])

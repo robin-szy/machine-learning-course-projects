@@ -393,6 +393,7 @@ def train(args):
     best_rmse, best_mae = float("inf"), None
     best_train_rmse, best_train_mae = None, None
     best_state = None
+    best_epoch = None
     epochs_no_improve = 0
 
     for epoch in range(args.epochs):
@@ -423,6 +424,7 @@ def train(args):
                 best_mae  = val_mae
                 best_train_rmse = train_rmse
                 best_train_mae = train_mae
+                best_epoch = epoch + 1
                 best_state = {k: v.detach().cpu().clone()
                               for k, v in model.state_dict().items()}
                 epochs_no_improve = 0
@@ -480,6 +482,7 @@ def train(args):
         "huber_delta": args.huber_delta,
         "stratify": args.stratify,
         "total_params": total_params,
+        "best_epoch": best_epoch if not args.final_train else args.epochs,
         "best_train_mae": best_train_mae if not args.final_train else None,
         "best_train_rmse": best_train_rmse if not args.final_train else None,
         "best_mae": best_mae if not args.final_train else None,
