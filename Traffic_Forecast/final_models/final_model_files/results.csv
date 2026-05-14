@@ -1,0 +1,12 @@
+model_file,model_version,final_train,hidden_size,lr,weight_decay,dropout,seed,loss,huber_delta,stratify,total_params,best_epoch,best_train_mae,best_train_rmse,best_mae,best_rmse
+final_gcnmlp32.pth,gcn_mlp_hl32,True,32,0.002,0.001,0.3,523,huber,1.0,true,11201,71,,,,
+final_gcnmlp64.pth,gcn_mlp_hl64,True,64,0.002,0.001,0.3,523,huber,1.0,true,26401,80,,,,
+final_mlp96.pth,pure_mlp_hl96,True,96,0.001,0.001,0.2,523,huber,1.0,true,28193,110,,,,
+final_mlp64.pth,pure_mlp_hl64,True,64,0.001,0.001,0.2,523,huber,1.0,true,15233,131,,,,
+final_cnn1dgcn32.pth,conv1d_gcn_hl32,True,32,0.001,0.001,0.15,523,huber,1.0,true,13025,120,,,,
+final_attngcn.pth,conv1d_gcn_attent,True,32,0.001,0.001,0.15,523,huber,1.0,true,10530,150,,,,
+final_cnn1dgcn64.pth,conv1d_gcn_hl64,True,64,0.001,0.001,0.15,523,huber,1.0,true,34145,113,,,,
+final_grugcn96.pth,gru_gcn_hl96,True,96,0.0008,0.001,0.2,523,huber,1.0,true,67937,111,,,,
+final_grugcn64.pth,gru_gcn_hl64,True,64,0.0008,0.001,0.2,523,huber,1.0,true,34401,167,,,,
+final_cnn1dgcn160.pth,conv1d_gcn_hl160,True,160,0.001,0.001,0.15,523,huber,1.0,true,171233,110,,,,
+final_gcngru.pth,gcn_gru,True,64,0.0005,0.001,0.05,523,huber,1.0,true,42209,160,,,,

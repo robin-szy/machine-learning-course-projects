@@ -1,0 +1,79 @@
+Found existing dataset: /home/users/rszymanski/Traffic_Forecast/data/dataset.npz
+X_train shape: (1261, 36, 48)
+Y_train shape: (1261, 36)
+FINAL TRAINING MODE: full dataset, no early stopping.
+Total parameters: 11201
+epoch 001 FINAL | train=0.1842
+epoch 002 FINAL | train=0.0677
+epoch 003 FINAL | train=0.0492
+epoch 004 FINAL | train=0.0445
+epoch 005 FINAL | train=0.0415
+epoch 006 FINAL | train=0.0398
+epoch 007 FINAL | train=0.0389
+epoch 008 FINAL | train=0.0371
+epoch 009 FINAL | train=0.0358
+epoch 010 FINAL | train=0.0351
+epoch 011 FINAL | train=0.0347
+epoch 012 FINAL | train=0.0346
+epoch 013 FINAL | train=0.0343
+epoch 014 FINAL | train=0.0337
+epoch 015 FINAL | train=0.0334
+epoch 016 FINAL | train=0.0343
+epoch 017 FINAL | train=0.0345
+epoch 018 FINAL | train=0.0339
+epoch 019 FINAL | train=0.0334
+epoch 020 FINAL | train=0.0333
+epoch 021 FINAL | train=0.0331
+epoch 022 FINAL | train=0.0326
+epoch 023 FINAL | train=0.0329
+epoch 024 FINAL | train=0.0332
+epoch 025 FINAL | train=0.0327
+epoch 026 FINAL | train=0.0331
+epoch 027 FINAL | train=0.0327
+epoch 028 FINAL | train=0.0324
+epoch 029 FINAL | train=0.0326
+epoch 030 FINAL | train=0.0334
+epoch 031 FINAL | train=0.0334
+epoch 032 FINAL | train=0.0312
+epoch 033 FINAL | train=0.0312
+epoch 034 FINAL | train=0.0316
+epoch 035 FINAL | train=0.0309
+epoch 036 FINAL | train=0.0310
+epoch 037 FINAL | train=0.0316
+epoch 038 FINAL | train=0.0309
+epoch 039 FINAL | train=0.0314
+epoch 040 FINAL | train=0.0315
+epoch 041 FINAL | train=0.0309
+epoch 042 FINAL | train=0.0311
+epoch 043 FINAL | train=0.0309
+epoch 044 FINAL | train=0.0307
+epoch 045 FINAL | train=0.0310
+epoch 046 FINAL | train=0.0303
+epoch 047 FINAL | train=0.0303
+epoch 048 FINAL | train=0.0303
+epoch 049 FINAL | train=0.0303
+epoch 050 FINAL | train=0.0304
+epoch 051 FINAL | train=0.0304
+epoch 052 FINAL | train=0.0306
+epoch 053 FINAL | train=0.0299
+epoch 054 FINAL | train=0.0301
+epoch 055 FINAL | train=0.0308
+epoch 056 FINAL | train=0.0300
+epoch 057 FINAL | train=0.0301
+epoch 058 FINAL | train=0.0299
+epoch 059 FINAL | train=0.0300
+epoch 060 FINAL | train=0.0293
+epoch 061 FINAL | train=0.0296
+epoch 062 FINAL | train=0.0294
+epoch 063 FINAL | train=0.0295
+epoch 064 FINAL | train=0.0293
+epoch 065 FINAL | train=0.0291
+epoch 066 FINAL | train=0.0293
+epoch 067 FINAL | train=0.0292
+epoch 068 FINAL | train=0.0288
+epoch 069 FINAL | train=0.0282
+epoch 070 FINAL | train=0.0290
+epoch 071 FINAL | train=0.0286
+Saved model to /home/users/rszymanski/Traffic_Forecast/runs/final_gcnmlp32.pth  (best RMSE=inf)
+Finished run: final_gcnmlp32
+Saved model: /home/users/rszymanski/Traffic_Forecast/runs/final_gcnmlp32.pth
