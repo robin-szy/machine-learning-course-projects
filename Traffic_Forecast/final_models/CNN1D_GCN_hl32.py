@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument("--mat-file", default="traffic_dataset.mat")
     parser.add_argument("--dataset-file", default="dataset.npz")
     parser.add_argument("--model-file", default="model_v3.pth")
-    parser.add_argument("--epochs", type=int, default=300)
+    parser.add_argument("--epochs", type=int, default=120)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=0.001)
     parser.add_argument("--weight-decay", type=float, default=0.001)
@@ -475,7 +475,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "pure_mlp",
+        "model_version": "conv1d_gcn_hl32",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,
@@ -605,13 +605,15 @@ def test_on_labeled_set(data_dir="data",
 
 
 if __name__ == "__main__":
-    #train(parse_args())
+    train(parse_args())
 
     # Only uncomment when you actually want to test final models
-    args = parse_args()
-    test_on_labeled_set(
-        data_dir=args.data_dir,
-        dataset_file=args.dataset_file,
-        model_file=args.model_file,
-        output_csv="runs/test_predictions.csv",
-    )
+    # args = parse_args()
+    # model_name = os.path.splitext(os.path.basename(args.model_file))[0]
+    # output_csv = f"runs/test_predictions_{model_name}.csv"
+    # test_on_labeled_set(
+    #     data_dir=args.data_dir,
+    #     dataset_file=args.dataset_file,
+    #     model_file=args.model_file,
+    #     output_csv=output_csv,
+    # )

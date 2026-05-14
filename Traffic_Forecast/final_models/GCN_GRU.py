@@ -24,7 +24,7 @@ def parse_args():
     parser.add_argument("--mat-file", default="traffic_dataset.mat")
     parser.add_argument("--dataset-file", default="dataset.npz")
     parser.add_argument("--model-file", default="model_v3.pth")
-    parser.add_argument("--epochs", type=int, default=300)
+    parser.add_argument("--epochs", type=int, default=160)
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--lr", type=float, default=0.0005)
     parser.add_argument("--weight-decay", type=float, default=0.001)
@@ -434,7 +434,7 @@ def train(args):
 
     checkpoint = {
         "model_state_dict": model.state_dict(),
-        "model_version":    "conv1d_gcn",
+        "model_version":    "gcn_gru",
         "hidden_size":      args.hidden_size,
         "dropout":          args.dropout,
         "n_sensors":        adj_mat.shape[0],
@@ -453,7 +453,7 @@ def train(args):
     os.makedirs(os.path.dirname(results_file), exist_ok=True)
     row = {
         "model_file": os.path.basename(args.model_file),
-        "model_version": "conv1d_gcn",
+        "model_version": "gcn_gru",
         "final_train": args.final_train,
         "hidden_size": args.hidden_size,
         "lr": args.lr,
@@ -477,5 +477,120 @@ def train(args):
         df.to_csv(results_file, index=False)
 
 
+def test_on_labeled_set(data_dir="data",
+                        dataset_file="dataset.npz",
+                        model_file="model_v3.pth",
+                        output_csv=None):
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    checkpoint = torch.load(model_file, map_location=device, weights_only=True)
+
+    data_path = os.path.join(data_dir, dataset_file)
+    data = np.load(data_path)
+
+    X_test = data["X_test"]
+    Y_test = data["Y_test"]
+
+    adj_mask = checkpoint["adj_mask"]
+
+    model = GCN_Conv1D(
+        hidden_size=int(checkpoint["hidden_size"]),
+        static_size=int(checkpoint.get("static_size", X_test.shape[-1] - 10)),
+        dropout=float(checkpoint["dropout"]),
+        n_sensors=int(checkpoint["n_sensors"]),
+        adj_mask=adj_mask,
+    ).to(device)
+
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.eval()
+
+    continuous_idx = checkpoint.get("continuous_idx", list(range(10)) + [39])
+    x_mean = checkpoint["x_mean"].cpu().numpy()
+    x_std = checkpoint["x_std"].cpu().numpy()
+    y_mean = float(checkpoint["y_mean"])
+    y_std = float(checkpoint["y_std"])
+
+    test_ds = TrafficDataset(
+        X_test,
+        Y_test,
+        continuous_idx=continuous_idx,
+        x_mean=x_mean,
+        x_std=x_std,
+        y_mean=y_mean,
+        y_std=y_std,
+    )
+
+    test_loader = DataLoader(test_ds, batch_size=32, shuffle=False)
+
+    y_true_all = []
+    y_pred_all = []
+
+    y_mean_t = torch.tensor(y_mean, dtype=torch.float32, device=device)
+    y_std_t = torch.tensor(y_std, dtype=torch.float32, device=device)
+
+    with torch.no_grad():
+        for x, y in test_loader:
+            x = x.to(device)
+            y = y.to(device)
+
+            pred = model(x)
+
+            pred_real = pred * y_std_t + y_mean_t
+            pred_real = pred_real.clamp(0.0, 1.0)
+
+            y_real = y * y_std_t + y_mean_t
+
+            y_pred_all.append(pred_real.cpu().numpy())
+            y_true_all.append(y_real.cpu().numpy())
+
+    y_pred = np.concatenate(y_pred_all, axis=0)
+    y_true = np.concatenate(y_true_all, axis=0)
+
+    rmse = float(np.sqrt(np.mean((y_pred - y_true) ** 2)))
+    mae = float(np.mean(np.abs(y_pred - y_true)))
+
+    print(f"Test samples: {len(y_true)}")
+    print(f"Test RMSE: {rmse:.4f}")
+    print(f"Test MAE:  {mae:.4f}")
+
+    rows = []
+    for t in range(y_true.shape[0]):
+        for sensor in range(y_true.shape[1]):
+            rows.append({
+                "time_idx": t,
+                "sensor": sensor,
+                "true": float(y_true[t, sensor]),
+                "pred": float(y_pred[t, sensor]),
+                "abs_error": float(abs(y_pred[t, sensor] - y_true[t, sensor])),
+                "sq_error": float((y_pred[t, sensor] - y_true[t, sensor]) ** 2),
+            })
+
+    pred_df = pd.DataFrame(rows)
+
+    if output_csv is not None:
+        pred_df.to_csv(output_csv, index=False)
+        print(f"Saved predictions to {output_csv}")
+
+    return {
+        "rmse": rmse,
+        "mae": mae,
+        "n_time_steps": y_true.shape[0],
+        "n_predictions": y_true.size,
+        "predictions": pred_df,
+    }
+
+
 if __name__ == "__main__":
     train(parse_args())
+
+    # Only uncomment when you actually want to test final models
+    # args = parse_args()
+    # model_name = os.path.splitext(os.path.basename(args.model_file))[0]
+    # output_csv = f"runs/test_predictions_{model_name}.csv"
+    # test_on_labeled_set(
+    #     data_dir=args.data_dir,
+    #     dataset_file=args.dataset_file,
+    #     model_file=args.model_file,
+    #     output_csv=output_csv,
+    # )
