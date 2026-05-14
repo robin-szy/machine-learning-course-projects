@@ -21,6 +21,15 @@ from scipy.io import loadmat
 OUT = "Intro_to_Machine_Learning___Slides_Final_Presentation/Images"
 os.makedirs(OUT, exist_ok=True)
 
+matplotlib.rcParams.update({
+    "font.size":        13,
+    "axes.titlesize":   14,
+    "axes.labelsize":   13,
+    "xtick.labelsize":  12,
+    "ytick.labelsize":  12,
+    "legend.fontsize":  12,
+})
+
 # ── palette ───────────────────────────────────────────────────────────────────
 RED    = "#c0392b"
 BLUE   = "#2980b9"
@@ -103,12 +112,12 @@ for i in range(n_sensors):
             color="white", zorder=5)
 
 cbar = fig.colorbar(sc, ax=ax, fraction=0.03, pad=0.02)
-cbar.set_label("Mean flow (norm.)", fontsize=8)
-ax.set_xlabel("Longitude", fontsize=8); ax.set_ylabel("Latitude", fontsize=8)
-ax.set_title("36 sensors · I-95 / I-66 corridor · Northern Virginia", fontsize=9)
+cbar.set_label("Mean flow (norm.)")
+ax.set_xlabel("Longitude"); ax.set_ylabel("Latitude")
+ax.set_title("36 sensors - I-95 / I-66 corridor - Northern Virginia")
 legend_h = [mpatches.Patch(color=ROAD_COLORS[r],
             label=["I-95", "I-66", "I-495 NW", "I-495 SW"][r]) for r in range(4)]
-ax.legend(handles=legend_h, fontsize=7, loc="upper left")
+ax.legend(handles=legend_h, loc="upper left")
 plt.tight_layout()
 plt.savefig(f"{OUT}/sensor_network.png", dpi=150, bbox_inches="tight")
 plt.close()
@@ -138,13 +147,13 @@ for start, width, color, label in groups:
     ax.add_patch(rect)
     cx = start + width/2
     ax.text(cx, y0 + h/2, label,
-            ha="center", va="center", fontsize=6.5, color="white",
+            ha="center", va="center", fontsize=8, color="white",
             fontweight="bold", multialignment="center")
 
-ax.text(24, -0.02, "Feature index  (0 → 47)", ha="center", va="top",
-        fontsize=8, color=DARK)
+ax.text(24, -0.02, "Feature index  (0 to 47)", ha="center", va="top",
+        color=DARK)
 ax.set_title("Input features per sensor per sample  [48 total]",
-             fontsize=9, color=DARK, pad=6)
+             color=DARK, pad=6)
 plt.tight_layout()
 plt.savefig(f"{OUT}/feature_breakdown.png", dpi=150, bbox_inches="tight")
 plt.close()
@@ -155,31 +164,37 @@ plt.close()
 # ══════════════════════════════════════════════════════════════════════════════
 print("3/7  rmse_comparison.png")
 models = [
-    ("Persistence\nbaseline",    0.0545, 0, GRAY),
-    ("V1 GRU-GCN\n(fixed adj)",  0.0538, 26593,  "#95a5a6"),
-    ("V2 GRU-GCN\n(learnable)",  0.0365, 13153,  BLUE),
-    ("GCN→Conv1D\n(per step)",   0.0380, 15009,  "#7f8c8d"),
-    ("CNN1D+Attn\nGCN",          0.0368, 10497,  "#7f8c8d"),
-    ("Pure MLP\n+ embed",        0.0357, 9601,   GREEN),
-    ("CNN1D-GCN\n(h=160)",       0.0359, 171233, ORANGE),
+    ("Persistence\nbaseline",    0.0545,  0,       GRAY),
+    ("CNN1D-\nAttentionGCN",     0.0409,  10530,   "#7f8c8d"),
+    ("GCN-GRU",                  0.0384,  42209,   "#95a5a6"),
+    ("GCN-MLP h=64",             0.0383,  26401,   "#95a5a6"),
+    ("GRU-GCN h=96",             0.0376,  67937,   BLUE),
+    ("GCN-MLP h=32",             0.0373,  11201,   "#95a5a6"),
+    ("CNN1D-GCN\nh=32",          0.0371,  13025,   ORANGE),
+    ("CNN1D-GCN\nh=160",         0.0370,  171233,  ORANGE),
+    ("GRU-GCN h=64",             0.0369,  34401,   BLUE),
+    ("Pure MLP\nh=64",           0.0364,  15233,   GREEN),
+    ("Transformer",              0.0362,  67585,   "#8e44ad"),
+    ("CNN1D-GCN\nh=64",          0.0362,  34145,   ORANGE),
+    ("Pure MLP\nh=96",           0.0355,  28193,   GREEN),
 ]
 names  = [m[0] for m in models]
 rmse   = [m[1] for m in models]
 params = [m[2] for m in models]
 colors = [m[3] for m in models]
 
-fig, ax = plt.subplots(figsize=(8, 4), facecolor=BG)
+fig, ax = plt.subplots(figsize=(8, 5.5), facecolor=BG)
 ax.set_facecolor(BG)
 bars = ax.barh(names, rmse, color=colors, edgecolor="white", height=0.6)
 ax.axvline(0.0545, color=GRAY, lw=1.2, ls="--", alpha=0.6)
 for bar, r, p in zip(bars, rmse, params):
     lbl = f"{r:.4f}" if p == 0 else f"{r:.4f}  ({p:,} params)"
     ax.text(r + 0.0003, bar.get_y() + bar.get_height()/2,
-            lbl, va="center", fontsize=7.5)
-ax.set_xlabel("Test RMSE (normalised flow)", fontsize=9)
+            lbl, va="center", fontsize=10)
+ax.set_xlabel("Test RMSE (normalised flow)")
 ax.set_xlim(0, 0.075)
 ax.invert_yaxis()
-ax.set_title("Model comparison — test set RMSE", fontsize=10, fontweight="bold")
+ax.set_title("Model comparison - test set RMSE", fontweight="bold")
 ax.spines[["top","right"]].set_visible(False)
 plt.tight_layout()
 plt.savefig(f"{OUT}/rmse_comparison.png", dpi=150, bbox_inches="tight")
@@ -191,12 +206,13 @@ plt.close()
 # ══════════════════════════════════════════════════════════════════════════════
 print("4/7  overfitting_analysis.png")
 results = [
-    ("V1 GRU-GCN",     0.0436, 0.0445, 0.0538),
-    ("V2 GRU-GCN",     0.0314, 0.0327, 0.0365),
-    ("Pure MLP+emb",   0.0308, 0.0329, 0.0357),
-    ("CNN1D-GCN h160", 0.0268, 0.0318, 0.0359),
-    ("GCN→Conv1D",     0.0325, 0.0338, 0.0380),
-    ("CNN1D+AttnGCN",  0.0309, 0.0331, 0.0368),
+    ("GRU-GCN h=96",       0.0322, 0.0338, 0.0359),
+    ("CNN1D-GCN h=160",    0.0304, 0.0327, 0.0357),
+    ("CNN1D-GCN h=64",     0.0317, 0.0332, 0.0361),
+    ("GCN-MLP h=64",       0.0316, 0.0334, 0.0358),
+    ("Pure MLP h=96",      0.0314, 0.0335, 0.0354),
+    ("CNN1D-AttnGCN",      0.0323, 0.0330, 0.0370),
+    ("Transformer",        0.0286, 0.0330, 0.0352),
 ]
 names2   = [r[0] for r in results]
 tr_rmse  = [r[1] for r in results]
@@ -212,9 +228,9 @@ ax1.set_facecolor(BG)
 ax1.bar(x - w, tr_rmse,  w, label="Train", color=BLUE,   alpha=0.85)
 ax1.bar(x,     val_rmse, w, label="Val",   color=ORANGE, alpha=0.85)
 ax1.bar(x + w, te_rmse,  w, label="Test",  color=RED,    alpha=0.85)
-ax1.set_xticks(x); ax1.set_xticklabels(names2, rotation=30, ha="right", fontsize=7.5)
-ax1.set_ylabel("RMSE", fontsize=9); ax1.legend(fontsize=8)
-ax1.set_title("Train / Val / Test RMSE", fontsize=10, fontweight="bold")
+ax1.set_xticks(x); ax1.set_xticklabels(names2, rotation=30, ha="right")
+ax1.set_ylabel("RMSE"); ax1.legend()
+ax1.set_title("Train / Val / Test RMSE", fontweight="bold")
 ax1.spines[["top","right"]].set_visible(False)
 
 # Right: gap bar chart with threshold line
@@ -224,13 +240,13 @@ brs = ax2.bar(names2, gaps, color=gap_colors, edgecolor="white")
 ax2.axhline(0.010, color=RED,    lw=1.5, ls="--", label="Overfit threshold (0.010)")
 ax2.axhline(0.004, color=ORANGE, lw=1.2, ls=":",  label="Watch zone (0.004)")
 ax2.set_xticks(range(len(names2)))
-ax2.set_xticklabels(names2, rotation=30, ha="right", fontsize=7.5)
-ax2.set_ylabel("Val − Train RMSE  (gap)", fontsize=9)
-ax2.set_title("Overfitting gap per model", fontsize=10, fontweight="bold")
-ax2.legend(fontsize=7.5); ax2.spines[["top","right"]].set_visible(False)
+ax2.set_xticklabels(names2, rotation=30, ha="right")
+ax2.set_ylabel("Val - Train RMSE  (gap)")
+ax2.set_title("Overfitting gap per model", fontweight="bold")
+ax2.legend(); ax2.spines[["top","right"]].set_visible(False)
 for bar, g in zip(brs, gaps):
     ax2.text(bar.get_x()+bar.get_width()/2, g+0.0001,
-             f"{g:.4f}", ha="center", fontsize=7)
+             f"{g:.4f}", ha="center", fontsize=10)
 
 plt.tight_layout()
 plt.savefig(f"{OUT}/overfitting_analysis.png", dpi=150, bbox_inches="tight")
@@ -256,10 +272,10 @@ fig, ax = plt.subplots(figsize=(6, 3.5), facecolor=BG)
 ax.set_facecolor(BG); ax.axis("off")
 
 boxes = [
-    (0.12, 0.25, 0.30, 0.50, GREEN,  "Pure MLP\n+ Embedding",
-     "9,601 params\nTest RMSE: 0.0357\nGap: +0.0021"),
+    (0.12, 0.25, 0.30, 0.50, GREEN,  "Pure MLP h=96\n+ Embedding",
+     "28,193 params\nTest RMSE: 0.0355\nGap: +0.0021"),
     (0.58, 0.25, 0.30, 0.50, ORANGE, "CNN1D-GCN\n(h = 160)",
-     "171,233 params\nTest RMSE: 0.0359\nGap: +0.0050"),
+     "171,233 params\nTest RMSE: 0.0370\nGap: +0.0023"),
 ]
 for (x, y, w, h, col, title, body) in boxes:
     rect = FancyBboxPatch((x, y), w, h, boxstyle="round,pad=0.02",
@@ -267,19 +283,19 @@ for (x, y, w, h, col, title, body) in boxes:
                           transform=ax.transAxes)
     ax.add_patch(rect)
     ax.text(x+w/2, y+h-0.08, title, ha="center", va="top",
-            fontsize=12, fontweight="bold", color=col,
+            fontsize=13, fontweight="bold", color=col,
             transform=ax.transAxes)
     ax.text(x+w/2, y+h/2-0.04, body, ha="center", va="center",
-            fontsize=9.5, color=DARK, transform=ax.transAxes,
+            fontsize=11, color=DARK, transform=ax.transAxes,
             multialignment="center")
 
-ax.text(0.5, 0.88, "Same accuracy · 18× fewer parameters",
-        ha="center", va="center", fontsize=13, fontweight="bold",
+ax.text(0.5, 0.88, "Similar RMSE - 6x fewer parameters",
+        ha="center", va="center", fontsize=14, fontweight="bold",
         color=DARK, transform=ax.transAxes)
 ax.annotate("", xy=(0.57, 0.50), xytext=(0.43, 0.50),
             xycoords="axes fraction",
             arrowprops=dict(arrowstyle="<->", color=DARK, lw=2))
-ax.text(0.5, 0.44, "≈ equal RMSE", ha="center", fontsize=9,
+ax.text(0.5, 0.44, "equal RMSE", ha="center", fontsize=11,
         color=DARK, transform=ax.transAxes)
 
 plt.tight_layout()
@@ -325,10 +341,10 @@ def draw_frame(h):
         ax_gif.text(lon_arr[i], lat_arr[i], str(i),
                     ha="center", va="center", fontsize=4.5,
                     fontweight="bold", color="white", zorder=5)
-    ax_gif.set_title(f"Monday  {h:02d}:00  — mean traffic flow",
-                     fontsize=10, fontweight="bold")
-    ax_gif.set_xlabel("Longitude", fontsize=8)
-    ax_gif.set_ylabel("Latitude",  fontsize=8)
+    ax_gif.set_title(f"Monday  {h:02d}:00 - mean traffic flow",
+                     fontweight="bold")
+    ax_gif.set_xlabel("Longitude")
+    ax_gif.set_ylabel("Latitude")
     ax_gif.set_xlim(lon_arr.min()-0.03, lon_arr.max()+0.03)
     ax_gif.set_ylim(lat_arr.min()-0.02, lat_arr.max()+0.02)
     return sc2,
@@ -358,8 +374,8 @@ for h in range(24):
         ax_f.text(lon_arr[i], lat_arr[i], str(i),
                   ha="center", va="center", fontsize=4.5,
                   fontweight="bold", color="white", zorder=5)
-    ax_f.set_title(f"Monday  {h:02d}:00", fontsize=9, fontweight="bold")
-    ax_f.set_xlabel("Longitude", fontsize=7); ax_f.set_ylabel("Latitude", fontsize=7)
+    ax_f.set_title(f"Monday  {h:02d}:00", fontweight="bold")
+    ax_f.set_xlabel("Longitude"); ax_f.set_ylabel("Latitude")
     ax_f.set_xlim(lon_arr.min()-0.03, lon_arr.max()+0.03)
     ax_f.set_ylim(lat_arr.min()-0.02, lat_arr.max()+0.02)
     plt.tight_layout()
