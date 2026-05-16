@@ -9,6 +9,7 @@ venv.bak/
 
 # PyCharm
 .idea/
+__pycache__/
 
 # Zip files that might be dowrloaded at some point
 *.zip
@@ -22,6 +23,8 @@ Other files
 */birch3.txt
 */.DS_Store
 *.npz
+*.gif
+*.mat
 
 Traffic_Forecast/data/
 Traffic_Forecast/runs/

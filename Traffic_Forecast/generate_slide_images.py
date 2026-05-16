@@ -93,7 +93,7 @@ ROAD_COLORS = [RED, BLUE, GREEN, ORANGE]
 # ══════════════════════════════════════════════════════════════════════════════
 print("1/7  sensor_network.png")
 fig, ax = plt.subplots(figsize=(7, 6), facecolor=BG)
-ax.set_facecolor(BG)
+ax.set_facecolor("white")
 
 # edges
 for i in range(n_sensors):
@@ -108,18 +108,93 @@ sc = ax.scatter(lon_arr, lat_arr, c=mean_vol, cmap="YlOrRd",
                 edgecolors=DARK, linewidths=1.2)
 for i in range(n_sensors):
     ax.text(lon_arr[i], lat_arr[i], str(i),
-            ha="center", va="center", fontsize=5.5, fontweight="bold",
+            ha="center", va="center", fontsize=8, fontweight="bold",
             color="white", zorder=5)
 
 cbar = fig.colorbar(sc, ax=ax, fraction=0.03, pad=0.02)
 cbar.set_label("Mean flow (norm.)")
-ax.set_xlabel("Longitude"); ax.set_ylabel("Latitude")
-ax.set_title("36 sensors - I-95 / I-66 corridor - Northern Virginia")
+ax.set_xlabel("Longitude", fontsize=14)
+ax.set_ylabel("Latitude", fontsize=14)
+ax.set_title(
+    "36 sensors - I-95 / I-66 corridor - Northern Virginia",
+    fontsize=18
+)
 # legend_h = [mpatches.Patch(color=ROAD_COLORS[r],
 #             label=["I-95", "I-66", "I-495 NW", "I-495 SW"][r]) for r in range(4)]
 # ax.legend(handles=legend_h, loc="upper left")
 plt.tight_layout()
 plt.savefig(f"{OUT}/sensor_network.png", dpi=150, bbox_inches="tight")
+plt.close()
+
+
+# Bigger global font controls
+TITLE_FS = 22
+LABEL_FS = 20
+TICK_FS = 16
+CBAR_FS = 18
+NODE_FS = 12
+
+fig, ax = plt.subplots(figsize=(7, 6), facecolor=BG)
+ax.set_facecolor("white")
+
+# edges
+for i in range(n_sensors):
+    for j in range(i+1, n_sensors):
+        if adj[i, j] > 0.05:
+            ax.plot(
+                [lon_arr[i], lon_arr[j]],
+                [lat_arr[i], lat_arr[j]],
+                color="#aaaaaa",
+                lw=1.5,
+                alpha=0.6,
+                zorder=1
+            )
+
+mean_vol = Y_all.mean(axis=0)
+sc = ax.scatter(
+    lon_arr, lat_arr,
+    c=mean_vol,
+    cmap="YlOrRd",
+    s=220,
+    vmin=0,
+    vmax=0.7,
+    zorder=4,
+    edgecolors=DARK,
+    linewidths=1.5
+)
+
+for i in range(n_sensors):
+    ax.text(
+        lon_arr[i], lat_arr[i], str(i),
+        ha="center",
+        va="center",
+        fontsize=NODE_FS,
+        fontweight="bold",
+        color="black",
+        zorder=5
+    )
+
+# Colorbar
+cbar = fig.colorbar(sc, ax=ax, fraction=0.04, pad=0.03)
+cbar.set_label("Mean flow (norm.)", fontsize=CBAR_FS)
+cbar.ax.tick_params(labelsize=TICK_FS)
+
+# Axis labels
+ax.set_xlabel("Longitude", fontsize=LABEL_FS)
+ax.set_ylabel("Latitude", fontsize=LABEL_FS)
+
+# Tick labels
+ax.tick_params(axis='both', labelsize=TICK_FS)
+
+# Title
+ax.set_title(
+    "36 sensors - I-95 / I-66 corridor - Northern Virginia",
+    fontsize=TITLE_FS,
+    pad=14
+)
+
+plt.tight_layout()
+plt.savefig(f"{OUT}/sensor_network_bigger.png", dpi=150, bbox_inches="tight")
 plt.close()
 
 
@@ -133,12 +208,12 @@ ax.set_xlim(0, 48); ax.set_ylim(0, 1); ax.axis("off")
 
 # (start, width, color, label, fontsize, rotation)
 groups = [
-    (0,  10, "#2980b9",  "Traffic history\n(×10 steps)",  8,  0),
-    (10,  5, "#27ae60",  "Weekday\n(one-hot ×5)",          6,  0),
-    (15, 24, "#e67e22",  "Hour of day\n(one-hot ×24)",    10,  0),
-    (39,  1, "#8e44ad",  "Lanes",                          8, 90),
-    (40,  4, "#c0392b",  "Direction\n(×4)",                6,  0),
-    (44,  4, "#16a085",  "Road\n(×4)",                     7,  0),
+    (0,  10, "#2980b9",  "Traffic history\n(×10 steps)",  9,  0),
+    (10,  5, "#27ae60",  "Weekday\n(×5)",          9,  0),
+    (15, 24, "#e67e22",  "Hour of day\n(×24)",    9,  0),
+    (39,  1, "#8e44ad",  "Lanes",                          9, 90),
+    (40,  4, "#c0392b",  "Direction\n(×4)",                8,  0),
+    (44,  4, "#16a085",  "Road\n(×4)",                     9,  0),
 ]
 y0, h = 0.25, 0.5
 for start, width, color, label, fs, rot in groups:
@@ -151,9 +226,9 @@ for start, width, color, label, fs, rot in groups:
             ha="center", va="center", fontsize=fs, color="white",
             fontweight="bold", multialignment="center", rotation=rot)
 
-ax.text(24, -0.02, "Feature index  (0 to 47)", ha="center", va="top",
+ax.text(24, -0.02, "One-hot encoded: Weekday, hour of day, direction, road", ha="center", va="top",
         color=DARK)
-ax.set_title("Input features per sensor per sample  [48 total]",
+ax.set_title("Input features per sensor (48 total)",
              color=DARK, pad=6)
 plt.tight_layout()
 plt.savefig(f"{OUT}/feature_breakdown.png", dpi=150, bbox_inches="tight")
@@ -165,38 +240,104 @@ plt.close()
 # ══════════════════════════════════════════════════════════════════════════════
 print("3/7  rmse_comparison.png")
 models = [
-    ("Persistence\nbaseline",    0.0545,  0,       GRAY),
-    ("CNN1D-\nAttentionGCN",     0.0409,  10530,   "#7f8c8d"),
-    ("GCN-GRU",                  0.0384,  42209,   "#95a5a6"),
-    ("GCN-MLP h=64",             0.0383,  26401,   "#95a5a6"),
-    ("GRU-GCN h=96",             0.0376,  67937,   BLUE),
-    ("GCN-MLP h=32",             0.0373,  11201,   "#95a5a6"),
-    ("CNN1D-GCN\nh=32",          0.0371,  13025,   ORANGE),
-    ("CNN1D-GCN\nh=160",         0.0370,  171233,  ORANGE),
-    ("GRU-GCN h=64",             0.0369,  34401,   BLUE),
-    ("Pure MLP\nh=64",           0.0364,  15233,   GREEN),
+    ("Baseline",    0.0545,  0,       GRAY),
+   # ("CNN1D-\nAttentionGCN",     0.0409,  10530,   "#7f8c8d"),
+    ("GCN-GRU",  0.0384, 42209, BLUE),   # softer steel blue
+    ("GCN-MLP",  0.0383, 26401, BLUE),   # muted olive green
+    ("GRU-GCN h=96",             0.0376,  67937,   RED),
+    #("GCN-MLP h=32",             0.0373,  11201,   "#95a5a6"),
+    #("CNN1D-GCN\nh=32",          0.0371,  13025,   ORANGE),
+    ("CNN1D-GCN h=160",         0.0370,  171233,  ORANGE),
+    ("GRU-GCN h=64",             0.0369,  34401,   RED),
+  #  ("Pure MLP\nh=64",           0.0364,  15233,   GREEN),
     ("Transformer",              0.0362,  67585,   "#8e44ad"),
-    ("CNN1D-GCN\nh=64",          0.0362,  34145,   ORANGE),
-    ("Pure MLP\nh=96",           0.0355,  28193,   GREEN),
+    ("CNN1D-GCN h=64",          0.0362,  34145,   ORANGE),
+    ("Pure MLP h=96",           0.0355,  28193,   GREEN),
 ]
 names  = [m[0] for m in models]
 rmse   = [m[1] for m in models]
 params = [m[2] for m in models]
 colors = [m[3] for m in models]
 
-fig, ax = plt.subplots(figsize=(8, 5.5), facecolor=BG)
-ax.set_facecolor(BG)
-bars = ax.barh(names, rmse, color=colors, edgecolor="white", height=0.6)
-ax.axvline(0.0545, color=GRAY, lw=1.2, ls="--", alpha=0.6)
+# fig, ax = plt.subplots(figsize=(8, 5.5), facecolor=BG)
+# ax.set_facecolor(BG)
+# bars = ax.barh(names, rmse, color=colors, edgecolor="white", height=0.6)
+# ax.axvline(0.0545, color=GRAY, lw=1.2, ls="--", alpha=0.6)
+# for bar, r, p in zip(bars, rmse, params):
+#     lbl = f"{r:.4f}" if p == 0 else f"{r:.4f}  ({p:,} params)"
+#     ax.text(r + 0.0003, bar.get_y() + bar.get_height()/2,
+#             lbl, va="center", fontsize=10)
+# ax.set_xlabel("Test RMSE (normalised flow)")
+# ax.set_xlim(0, 0.075)
+# ax.invert_yaxis()
+# ax.set_title("Model comparison - test set RMSE", fontweight="bold")
+# ax.spines[["top","right"]].set_visible(False)
+# plt.tight_layout()
+# plt.savefig(f"{OUT}/rmse_comparison.png", dpi=150, bbox_inches="tight")
+# plt.close()
+
+
+# Larger font controls
+TITLE_FS = 20
+LABEL_FS = 18
+TICK_FS = 16
+ANNOT_FS = 14
+
+fig, ax = plt.subplots(figsize=(8, 5.5), facecolor="white")
+ax.set_facecolor("white")
+
+bars = ax.barh(
+    names,
+    rmse,
+    color=colors,
+    edgecolor="white",
+    height=0.6
+)
+
+# Baseline reference line
+ax.axvline(
+    0.0545,
+    color=GRAY,
+    lw=1.5,
+    ls="--",
+    alpha=0.6
+)
+
+# Value labels
 for bar, r, p in zip(bars, rmse, params):
     lbl = f"{r:.4f}" if p == 0 else f"{r:.4f}  ({p:,} params)"
-    ax.text(r + 0.0003, bar.get_y() + bar.get_height()/2,
-            lbl, va="center", fontsize=10)
-ax.set_xlabel("Test RMSE (normalised flow)")
+    ax.text(
+        r + 0.0003,
+        bar.get_y() + bar.get_height() / 2,
+        lbl,
+        va="center",
+        fontsize=ANNOT_FS
+    )
+
+# Axis labels
+ax.set_xlabel(
+    "Test RMSE (normalised flow)",
+    fontsize=LABEL_FS
+)
+
+# Tick labels
+ax.tick_params(axis='both', labelsize=TICK_FS)
+
+# Limits and order
 ax.set_xlim(0, 0.075)
 ax.invert_yaxis()
-ax.set_title("Model comparison - test set RMSE", fontweight="bold")
-ax.spines[["top","right"]].set_visible(False)
+
+# Title
+ax.set_title(
+    "Model Comparison - Test Set RMSE",
+    fontsize=TITLE_FS,
+    fontweight="bold",
+    pad=12
+)
+
+# Clean style
+ax.spines[["top", "right"]].set_visible(False)
+
 plt.tight_layout()
 plt.savefig(f"{OUT}/rmse_comparison.png", dpi=150, bbox_inches="tight")
 plt.close()
@@ -210,9 +351,9 @@ results = [
     ("GRU-GCN h=96",       0.0322, 0.0338, 0.0359),
     ("CNN1D-GCN h=160",    0.0304, 0.0327, 0.0357),
     ("CNN1D-GCN h=64",     0.0317, 0.0332, 0.0361),
-    ("GCN-MLP h=64",       0.0316, 0.0334, 0.0358),
+    ("GCN-MLP",            0.0316, 0.0334, 0.0358),
     ("Pure MLP h=96",      0.0314, 0.0335, 0.0354),
-    ("CNN1D-AttnGCN",      0.0323, 0.0330, 0.0370),
+    #("CNN1D-AttnGCN",      0.0323, 0.0330, 0.0370),
     ("Transformer",        0.0286, 0.0330, 0.0352),
 ]
 names2   = [r[0] for r in results]
@@ -240,7 +381,7 @@ brs = ax2.bar(names2, gaps, color=BLUE, edgecolor="white")
 ax2.set_xticks(range(len(names2)))
 ax2.set_xticklabels(names2, rotation=30, ha="right")
 ax2.set_ylabel("Val - Train RMSE  (gap)")
-ax2.set_title("Overfitting gap per model", fontweight="bold")
+ax2.set_title("Overfitting gap", fontweight="bold")
 ax2.spines[["top","right"]].set_visible(False)
 for bar, g in zip(brs, gaps):
     ax2.text(bar.get_x()+bar.get_width()/2, g+0.0001,
