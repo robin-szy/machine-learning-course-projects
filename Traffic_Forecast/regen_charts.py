@@ -75,6 +75,12 @@ val_rmse = [r[2] for r in results]
 te_rmse  = [r[3] for r in results]
 gaps     = [v - t for t, v in zip(tr_rmse, val_rmse)]
 
+BASELINE  = 0.0545
+BEST      = 0.0355
+imp_range = BASELINE - BEST
+thresh_watch   = 0.20 * imp_range
+thresh_overfit = 0.50 * imp_range
+
 x = np.arange(len(names2)); w = 0.26
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.5), facecolor=BG)
 
@@ -83,15 +89,16 @@ ax1.bar(x - w, tr_rmse,  w, label="Train", color=BLUE,   alpha=0.85)
 ax1.bar(x,     val_rmse, w, label="Val",   color=ORANGE, alpha=0.85)
 ax1.bar(x + w, te_rmse,  w, label="Test",  color=RED,    alpha=0.85)
 ax1.set_xticks(x); ax1.set_xticklabels(names2, rotation=30, ha="right")
-ax1.set_ylabel("RMSE"); ax1.legend()
+ax1.set_ylabel("RMSE"); ax1.legend(loc="lower right")
 ax1.set_title("Train / Val / Test RMSE", fontweight="bold")
 ax1.spines[["top","right"]].set_visible(False)
 
-gap_colors = [RED if g > 0.01 else (ORANGE if g > 0.004 else BLUE) for g in gaps]
+mean_gap = float(np.mean(gaps))
+gap_colors = [RED if g > thresh_overfit else (ORANGE if g > thresh_watch else BLUE) for g in gaps]
 ax2.set_facecolor(BG)
-brs = ax2.bar(names2, gaps, color=gap_colors, edgecolor="white")
-ax2.axhline(0.010, color=RED,    lw=1.5, ls="--", label="Overfit threshold (0.010)")
-ax2.axhline(0.004, color=ORANGE, lw=1.2, ls=":",  label="Watch zone (0.004)")
+brs = ax2.bar(names2, gaps, color=BLUE, edgecolor="white")
+ax2.axhline(mean_gap, color=GRAY, lw=1.5, ls="--",
+            label=f"Mean gap ({mean_gap:.4f})")
 ax2.set_xticks(range(len(names2)))
 ax2.set_xticklabels(names2, rotation=30, ha="right")
 ax2.set_ylabel("Val - Train RMSE (gap)")

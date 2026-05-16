@@ -43,6 +43,7 @@ SEED = 523
 # ── Road metadata ─────────────────────────────────────────────────────────────
 ROAD_LABELS = ["I-95", "I-66", "I-495 NW", "I-495 SW"]
 ROAD_COLORS = ["#c0392b", "#2980b9", "#27ae60", "#e67e22"]
+GRAY = "#95a5a6"
 
 
 def set_seed(s):
@@ -202,10 +203,9 @@ def main():
                         dropout=0.2, n_sensors=data["adj_mat"].shape[0]).to(device)
         model.load_state_dict(ckpt["model_state_dict"])
         adj_mat = data["adj_mat"]
-        test_rmse = None
     else:
         print("Training Pure MLP...")
-        model, adj_mat, test_rmse = train_pure_mlp(device)
+        model, adj_mat, _ = train_pure_mlp(device)
 
     model.eval()
 
@@ -246,53 +246,106 @@ def main():
         best_dim = corr_df[feat].abs().idxmax()
         print(f"  {feat:<20} max |r| = {val:.3f}  (dim {best_dim})")
 
-    # ── Figure ────────────────────────────────────────────────────────────────
-    fig = plt.figure(figsize=(14, 5))
-    gs  = gridspec.GridSpec(1, 3, figure=fig, wspace=0.38)
+    # ── Figure: Option B ──────────────────────────────────────────────────────
+    # Left: single PCA, color=road, size=mean flow
+    # Right: bar chart of max |r| per feature
+    fig = plt.figure(figsize=(11, 5))
+    gs  = gridspec.GridSpec(1, 2, figure=fig, wspace=0.42)
 
-    ax1 = fig.add_subplot(gs[0])
+    # Normalise mean_flow to dot size range [40, 220]
+    mf_min, mf_max = mean_flow.min(), mean_flow.max()
+    dot_sizes = 40 + 180 * (mean_flow - mf_min) / max(mf_max - mf_min, 1e-6)
+
+    # Bar chart: max |r| per feature
+    ax2 = fig.add_subplot(gs[0])
+    feat_names  = list(features.keys())
+    max_r_vals  = [corr_df[f].abs().max() for f in feat_names]
+    best_dims   = [corr_df[f].abs().idxmax() for f in feat_names]
+    bar_colors  = [ROAD_COLORS[i % len(ROAD_COLORS)] for i in range(len(feat_names))]
+    bars = ax2.barh(feat_names, max_r_vals, color=bar_colors,
+                    edgecolor="white", height=0.5)
+    ax2.axvline(0.3, color=GRAY, lw=1.2, ls="--", alpha=0.6, label="|r| = 0.3")
+    for bar, r, dim in zip(bars, max_r_vals, best_dims):
+        ax2.text(r + 0.01, bar.get_y() + bar.get_height() / 2,
+                 f"|r|={r:.2f}  ({dim})", va="center", fontsize=10)
+    ax2.set_xlabel("Max |Pearson r| across embedding dims")
+    ax2.set_xlim(0, 0.65)
+    ax2.set_title("Which road features does\nembedding explain?", fontweight="bold")
+    ax2.legend(fontsize=9)
+    ax2.spines[["top", "right"]].set_visible(False)
+
+    # PCA: color=road, size=mean flow
+    ax1 = fig.add_subplot(gs[1])
     for road in range(4):
         mask = road_id == road
         ax1.scatter(emb_2d[mask, 0], emb_2d[mask, 1],
                     c=ROAD_COLORS[road], label=ROAD_LABELS[road],
-                    s=90, edgecolors="k", linewidths=0.4, zorder=3)
+                    s=dot_sizes[mask], edgecolors="k", linewidths=0.4,
+                    alpha=0.85, zorder=3)
     for i in range(N):
-        ax1.annotate(str(i), emb_2d[i], fontsize=7,
+        ax1.annotate(str(i), emb_2d[i], fontsize=10,
                      ha="center", va="center", color="#333333")
+    for label, val in [("Low flow", mf_min), ("High flow", mf_max)]:
+        sz = 40 + 180 * (val - mf_min) / max(mf_max - mf_min, 1e-6)
+        ax1.scatter([], [], s=sz, c="gray", edgecolors="k",
+                    linewidths=0.4, label=label, alpha=0.7)
     ax1.set_xlabel(f"PC1 ({var_exp[0]*100:.1f}%)")
     ax1.set_ylabel(f"PC2 ({var_exp[1]*100:.1f}%)")
-    ax1.set_title("PCA - colored by road")
-    ax1.legend(loc="best", fontsize=9)
+    ax1.set_title("PCA - color: road,  size: mean flow", fontweight="bold")
+    ax1.legend(loc="best", fontsize=10)
+    ax1.spines[["top", "right"]].set_visible(False)
 
-    ax2 = fig.add_subplot(gs[1])
-    sc = ax2.scatter(emb_2d[:, 0], emb_2d[:, 1],
-                     c=mean_flow, cmap="YlOrRd", s=90,
-                     edgecolors="k", linewidths=0.4, zorder=3)
-    for i in range(N):
-        ax2.annotate(str(i), emb_2d[i], fontsize=7,
-                     ha="center", va="center", color="#333333")
-    plt.colorbar(sc, ax=ax2, shrink=0.8, label="Mean flow")
-    ax2.set_xlabel(f"PC1 ({var_exp[0]*100:.1f}%)")
-    ax2.set_title("PCA - colored by mean flow")
-
-    ax3 = fig.add_subplot(gs[2])
-    corr_mat = np.array([corr[f] for f in features]).T  # [8, 4]
-    im = ax3.imshow(corr_mat, aspect="auto", cmap="RdBu_r", vmin=-1, vmax=1)
-    ax3.set_xticks(range(len(features)))
-    ax3.set_xticklabels(list(features.keys()), rotation=25, ha="right", fontsize=11)
-    ax3.set_yticks(range(emb.shape[1]))
-    ax3.set_yticklabels([f"Dim {i}" for i in range(emb.shape[1])], fontsize=11)
-    ax3.set_title("Feature correlation")
-    plt.colorbar(im, ax=ax3, shrink=0.8, label="Pearson r")
-    for i in range(corr_mat.shape[0]):
-        for j in range(corr_mat.shape[1]):
-            ax3.text(j, i, f"{corr_mat[i,j]:.2f}", ha="center", va="center",
-                     fontsize=9, color="white" if abs(corr_mat[i,j]) > 0.5 else "black")
-
-    title_suffix = f"  (test RMSE={test_rmse:.4f})" if test_rmse else ""
-    fig.suptitle(f"Pure MLP - Sensor Embedding Analysis{title_suffix}", fontsize=14)
     plt.savefig(OUT_IMAGE, dpi=150, bbox_inches="tight")
     print(f"\nSaved {OUT_IMAGE}")
+    plt.close()
+
+    # ── Old 3-subplot version saved as OLD_embedding_analysis.png ─────────────
+    old_out = OUT_IMAGE.replace("embedding_analysis.png", "OLD_embedding_analysis.png")
+    fig_old = plt.figure(figsize=(14, 5))
+    gs_old  = gridspec.GridSpec(1, 3, figure=fig_old, wspace=0.38)
+
+    ax_o1 = fig_old.add_subplot(gs_old[0])
+    for road in range(4):
+        mask = road_id == road
+        ax_o1.scatter(emb_2d[mask, 0], emb_2d[mask, 1],
+                      c=ROAD_COLORS[road], label=ROAD_LABELS[road],
+                      s=90, edgecolors="k", linewidths=0.4, zorder=3)
+    for i in range(N):
+        ax_o1.annotate(str(i), emb_2d[i], fontsize=7,
+                       ha="center", va="center", color="#333333")
+    ax_o1.set_xlabel(f"PC1 ({var_exp[0]*100:.1f}%)")
+    ax_o1.set_ylabel(f"PC2 ({var_exp[1]*100:.1f}%)")
+    ax_o1.set_title("PCA - colored by road")
+    ax_o1.legend(loc="best", fontsize=9)
+
+    ax_o2 = fig_old.add_subplot(gs_old[1])
+    sc_o = ax_o2.scatter(emb_2d[:, 0], emb_2d[:, 1],
+                         c=mean_flow, cmap="YlOrRd", s=90,
+                         edgecolors="k", linewidths=0.4, zorder=3)
+    for i in range(N):
+        ax_o2.annotate(str(i), emb_2d[i], fontsize=7,
+                       ha="center", va="center", color="#333333")
+    plt.colorbar(sc_o, ax=ax_o2, shrink=0.8, label="Mean flow")
+    ax_o2.set_xlabel(f"PC1 ({var_exp[0]*100:.1f}%)")
+    ax_o2.set_title("PCA - colored by mean flow")
+
+    ax_o3 = fig_old.add_subplot(gs_old[2])
+    corr_mat = np.array([corr[f] for f in features]).T
+    im_o = ax_o3.imshow(corr_mat, aspect="auto", cmap="RdBu_r", vmin=-1, vmax=1)
+    ax_o3.set_xticks(range(len(features)))
+    ax_o3.set_xticklabels(list(features.keys()), rotation=25, ha="right", fontsize=11)
+    ax_o3.set_yticks(range(emb.shape[1]))
+    ax_o3.set_yticklabels([f"Dim {i}" for i in range(emb.shape[1])], fontsize=11)
+    ax_o3.set_title("Feature correlation")
+    plt.colorbar(im_o, ax=ax_o3, shrink=0.8, label="Pearson r")
+    for i in range(corr_mat.shape[0]):
+        for j in range(corr_mat.shape[1]):
+            ax_o3.text(j, i, f"{corr_mat[i,j]:.2f}", ha="center", va="center",
+                       fontsize=9, color="white" if abs(corr_mat[i,j]) > 0.5 else "black")
+
+    fig_old.suptitle("Pure MLP - Sensor Embedding Analysis (old)", fontsize=14)
+    plt.savefig(old_out, dpi=150, bbox_inches="tight")
+    print(f"Saved {old_out}")
     plt.close()
 
 

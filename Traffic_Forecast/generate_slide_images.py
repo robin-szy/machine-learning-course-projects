@@ -115,9 +115,9 @@ cbar = fig.colorbar(sc, ax=ax, fraction=0.03, pad=0.02)
 cbar.set_label("Mean flow (norm.)")
 ax.set_xlabel("Longitude"); ax.set_ylabel("Latitude")
 ax.set_title("36 sensors - I-95 / I-66 corridor - Northern Virginia")
-legend_h = [mpatches.Patch(color=ROAD_COLORS[r],
-            label=["I-95", "I-66", "I-495 NW", "I-495 SW"][r]) for r in range(4)]
-ax.legend(handles=legend_h, loc="upper left")
+# legend_h = [mpatches.Patch(color=ROAD_COLORS[r],
+#             label=["I-95", "I-66", "I-495 NW", "I-495 SW"][r]) for r in range(4)]
+# ax.legend(handles=legend_h, loc="upper left")
 plt.tight_layout()
 plt.savefig(f"{OUT}/sensor_network.png", dpi=150, bbox_inches="tight")
 plt.close()
@@ -131,24 +131,25 @@ fig, ax = plt.subplots(figsize=(8, 2), facecolor=BG)
 ax.set_facecolor(BG)
 ax.set_xlim(0, 48); ax.set_ylim(0, 1); ax.axis("off")
 
+# (start, width, color, label, fontsize, rotation)
 groups = [
-    (0,  10, "#2980b9",  "Traffic history\n(×10 steps)"),
-    (10,  5, "#27ae60",  "Weekday\n(one-hot ×5)"),
-    (15, 24, "#e67e22",  "Hour of day\n(one-hot ×24)"),
-    (39,  1, "#8e44ad",  "Lanes"),
-    (40,  4, "#c0392b",  "Direction\n(×4)"),
-    (44,  4, "#16a085",  "Road name\n(×4)"),
+    (0,  10, "#2980b9",  "Traffic history\n(×10 steps)",  8,  0),
+    (10,  5, "#27ae60",  "Weekday\n(one-hot ×5)",          6,  0),
+    (15, 24, "#e67e22",  "Hour of day\n(one-hot ×24)",    10,  0),
+    (39,  1, "#8e44ad",  "Lanes",                          8, 90),
+    (40,  4, "#c0392b",  "Direction\n(×4)",                6,  0),
+    (44,  4, "#16a085",  "Road\n(×4)",                     7,  0),
 ]
 y0, h = 0.25, 0.5
-for start, width, color, label in groups:
+for start, width, color, label, fs, rot in groups:
     rect = mpatches.FancyBboxPatch((start+0.15, y0), width-0.3, h,
                                     boxstyle="round,pad=0.05",
                                     facecolor=color, edgecolor="white", lw=1.2)
     ax.add_patch(rect)
     cx = start + width/2
     ax.text(cx, y0 + h/2, label,
-            ha="center", va="center", fontsize=8, color="white",
-            fontweight="bold", multialignment="center")
+            ha="center", va="center", fontsize=fs, color="white",
+            fontweight="bold", multialignment="center", rotation=rot)
 
 ax.text(24, -0.02, "Feature index  (0 to 47)", ha="center", va="top",
         color=DARK)
@@ -229,21 +230,18 @@ ax1.bar(x - w, tr_rmse,  w, label="Train", color=BLUE,   alpha=0.85)
 ax1.bar(x,     val_rmse, w, label="Val",   color=ORANGE, alpha=0.85)
 ax1.bar(x + w, te_rmse,  w, label="Test",  color=RED,    alpha=0.85)
 ax1.set_xticks(x); ax1.set_xticklabels(names2, rotation=30, ha="right")
-ax1.set_ylabel("RMSE"); ax1.legend()
+ax1.set_ylabel("RMSE"); ax1.legend(loc="lower right")
 ax1.set_title("Train / Val / Test RMSE", fontweight="bold")
 ax1.spines[["top","right"]].set_visible(False)
 
-# Right: gap bar chart with threshold line
-gap_colors = [RED if g > 0.01 else (ORANGE if g > 0.004 else BLUE) for g in gaps]
+# Right: gap bar chart
 ax2.set_facecolor(BG)
-brs = ax2.bar(names2, gaps, color=gap_colors, edgecolor="white")
-ax2.axhline(0.010, color=RED,    lw=1.5, ls="--", label="Overfit threshold (0.010)")
-ax2.axhline(0.004, color=ORANGE, lw=1.2, ls=":",  label="Watch zone (0.004)")
+brs = ax2.bar(names2, gaps, color=BLUE, edgecolor="white")
 ax2.set_xticks(range(len(names2)))
 ax2.set_xticklabels(names2, rotation=30, ha="right")
 ax2.set_ylabel("Val - Train RMSE  (gap)")
 ax2.set_title("Overfitting gap per model", fontweight="bold")
-ax2.legend(); ax2.spines[["top","right"]].set_visible(False)
+ax2.spines[["top","right"]].set_visible(False)
 for bar, g in zip(brs, gaps):
     ax2.text(bar.get_x()+bar.get_width()/2, g+0.0001,
              f"{g:.4f}", ha="center", fontsize=10)
